@@ -1,0 +1,6 @@
+{
+  "[dart]": {
+    "editor.formatOnSave": true
+  },
+  "java.configuration.updateBuildConfiguration": "interactive"
+}
