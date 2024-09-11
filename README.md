@@ -13,6 +13,7 @@
    - [Flutter-SDK](https://flutter.dev/docs/get-started/install).
 
 1. Create a folder named **flutter** at `C:\` to install the Flutter SDK.
+After that add the following to **PATH** to the desktop environment `C:\flutter\bin`
 
 1. Install [Android-Studio](https://developer.android.com/studio/install) to run the flutter app in android emulator.
 
