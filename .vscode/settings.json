@@ -2,5 +2,7 @@
   "[dart]": {
     "editor.formatOnSave": true
   },
-  "java.configuration.updateBuildConfiguration": "interactive"
+  "java.configuration.updateBuildConfiguration": "interactive",
+  "cmake.sourceDirectory": "/home/mohamed/Desktop/project_444/linux",
+  "java.compile.nullAnalysis.mode": "automatic"
 }
