@@ -10,6 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   firebase_core: ^3.4.0
+  flutter_spinkit: ^5.2.1
 
 dev_dependencies:
   flutter_test:
