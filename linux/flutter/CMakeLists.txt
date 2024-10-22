@@ -86,3 +86,5 @@ add_custom_target(flutter_assemble DEPENDS
   "${FLUTTER_LIBRARY}"
   ${FLUTTER_LIBRARY_HEADERS}
 )
+set(GLIB_INCLUDE_DIRS /usr/include/glib-2.0 /usr/lib/x86_64-linux-gnu/glib-2.0/include)
+include_directories(${GLIB_INCLUDE_DIRS})
