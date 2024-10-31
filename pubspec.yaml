@@ -12,6 +12,9 @@ dependencies:
   firebase_core: ^3.4.0
   flutter_spinkit: ^5.2.1
   flutter_svg: ^2.0.10+1
+  firebase_auth: ^5.3.1
+  google_sign_in: ^6.2.1
+  cloud_firestore: ^5.4.4
 
 dev_dependencies:
   flutter_test:
