@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
 
-class reusableTextField extends StatefulWidget {
+class ReusableTextField extends StatefulWidget {
   final String hintText;
-  final String iconAssetPath;
+  final IconData name;
   final bool isPassword;
+  final Color? color;
   final TextEditingController controller;
 
-  const reusableTextField(
-      this.hintText, this.iconAssetPath, this.isPassword, this.controller,
+  const ReusableTextField(
+      this.hintText, this.name, this.color, this.isPassword, this.controller,
       {super.key});
 
   @override
-  _reusableTextFieldState createState() => _reusableTextFieldState();
+  _ReusableTextFieldState createState() => _ReusableTextFieldState();
 }
 
-class _reusableTextFieldState extends State<reusableTextField> {
+class _ReusableTextFieldState extends State<ReusableTextField> {
   late bool _obscureText;
 
   @override
@@ -25,36 +26,44 @@ class _reusableTextFieldState extends State<reusableTextField> {
 
   @override
   Widget build(BuildContext context) {
-    return TextField(
-      controller: widget.controller,
-      obscureText: _obscureText,
-      style: const TextStyle(
-        fontWeight: FontWeight.w400,
-        color: Colors.black,
-        fontSize: 12.0,
+    return Container(
+      margin: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        color: Colors.grey[200],
+        borderRadius: BorderRadius.circular(10.0),
       ),
-      decoration: InputDecoration(
-        border: InputBorder.none,
-        prefixIcon: widget.iconAssetPath.isNotEmpty
-            ? ImageIcon(AssetImage(widget.iconAssetPath))
-            : null,
-        suffixIcon: widget.isPassword
-            ? IconButton(
-                onPressed: () {
-                  setState(() {
-                    _obscureText = !_obscureText;
-                  });
-                },
-                icon: Icon(
-                    _obscureText ? Icons.visibility : Icons.visibility_off),
-              )
-            : null,
-        contentPadding: const EdgeInsets.only(top: 16.0),
-        hintText: widget.hintText,
-        hintStyle: TextStyle(
+      child: TextField(
+        controller: widget.controller,
+        obscureText: _obscureText,
+        style: const TextStyle(
           fontWeight: FontWeight.w400,
-          color: Colors.black.withOpacity(0.5),
-          fontSize: 12.0,
+          color: Colors.black,
+          fontSize: 16.0,
+        ),
+        decoration: InputDecoration(
+          border: OutlineInputBorder(
+            borderSide: BorderSide.none,
+            borderRadius: BorderRadius.circular(10.0),
+          ),
+          prefixIcon: Icon(widget.name, color: widget.color),
+          suffixIcon: widget.isPassword
+              ? IconButton(
+                  onPressed: () {
+                    setState(() {
+                      _obscureText = !_obscureText;
+                    });
+                  },
+                  icon: Icon(
+                      _obscureText ? Icons.visibility : Icons.visibility_off),
+                )
+              : null,
+          contentPadding: const EdgeInsets.only(top: 16.0),
+          hintText: widget.hintText,
+          hintStyle: TextStyle(
+            fontWeight: FontWeight.w400,
+            color: Colors.black.withOpacity(0.5),
+            fontSize: 16.0,
+          ),
         ),
       ),
     );
