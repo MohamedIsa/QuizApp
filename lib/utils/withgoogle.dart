@@ -25,9 +25,11 @@ Future<void> signInWithGoogle(BuildContext context) async {
 
     final User? firebaseUser = userCredential.user;
     if (firebaseUser != null) {
-      bool userExists = await checkIfUserExistsInDatabase(firebaseUser.uid);
-      if (userExists) {
+      String? userRole = await getUserRole(firebaseUser.uid);
+      if (userRole == 'student') {
         Navigator.pushReplacementNamed(context, '/dashboard');
+      } else if (userRole == 'admin') {
+        Navigator.pushReplacementNamed(context, '/admindashboard');
       } else {
         Navigator.pushReplacementNamed(context, '/completeProfile');
       }
@@ -37,7 +39,7 @@ Future<void> signInWithGoogle(BuildContext context) async {
   }
 }
 
-Future<bool> checkIfUserExistsInDatabase(String uid) async {
+Future<String?> getUserRole(String uid) async {
   try {
     DocumentSnapshot userSnapshot =
         await FirebaseFirestore.instance.collection('users').doc(uid).get();
@@ -46,14 +48,14 @@ Future<bool> checkIfUserExistsInDatabase(String uid) async {
       Map<String, dynamic> userData =
           userSnapshot.data() as Map<String, dynamic>;
 
-      if (userData.containsKey('name') && userData['role'] == 'student') {
-        return true;
+      if (userData.containsKey('role')) {
+        return userData['role'];
       }
     }
 
-    return false;
+    return null;
   } catch (e) {
-    print("Error checking user existence: $e");
-    return false;
+    print("Error getting user role: $e");
+    return null;
   }
 }
