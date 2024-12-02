@@ -24,6 +24,10 @@ To run the Flutter app, use the following command:
 ```
 flutter run
 ```
+## Installing Dependences 
+```
+flutter pub
+```
 
 ## Additional Notes
 
