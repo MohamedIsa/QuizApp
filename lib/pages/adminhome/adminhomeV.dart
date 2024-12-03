@@ -32,51 +32,54 @@ class Adminhome extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: FutureBuilder<String>(
-          future: fetchUserName(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Text("Hi, Loading...");
-            } else if (snapshot.hasError || !snapshot.hasData) {
-              return Text("Hi, User");
-            } else {
-              return Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      IconButton(
-                        icon: Icon(Icons.person),
-                        onPressed: () {
-                          // Handle profile icon click
-                        },
-                      ),
-                      Text(
-                        "Hi, ${snapshot.data}",
-                        style: TextStyle(fontSize: 18.0),
-                      ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      IconButton(
-                        icon: Icon(Icons.notifications),
-                        onPressed: () {
-                          // Handle notification icon click
-                        },
-                      ),
-                    ],
-                  ),
-                ],
-              );
-            }
-          },
+        appBar: AppBar(
+          title: FutureBuilder<String>(
+            future: fetchUserName(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Text("Hi, Loading...");
+              } else if (snapshot.hasError || !snapshot.hasData) {
+                return Text("Hi, User");
+              } else {
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.person),
+                          onPressed: () {
+                            // Handle profile icon click
+                          },
+                        ),
+                        Text(
+                          "Hi, ${snapshot.data}",
+                          style: TextStyle(fontSize: 18.0),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.notifications),
+                          onPressed: () {
+                            // Handle notification icon click
+                          },
+                        ),
+                      ],
+                    ),
+                  ],
+                );
+              }
+            },
+          ),
         ),
-      ),
-      body: Center(
-        child: AdminTabBar(),
-      ),
-    );
+        body: Center(
+          child: AdminTabBar(),
+        ),
+        floatingActionButton: FloatingActionButton(
+          child: Icon(Icons.add),
+          onPressed: () {},
+        ));
   }
 }
