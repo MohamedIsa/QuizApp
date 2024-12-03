@@ -61,7 +61,10 @@ class Adminhome extends StatelessWidget {
                     Row(
                       children: [
                         IconButton(
-                          icon: Icon(Icons.notifications),
+                          icon: Badge.count(
+                            count: 99,
+                            child: Icon(Icons.notifications),
+                          ),
                           onPressed: () {
                             // Handle notification icon click
                           },
@@ -79,7 +82,9 @@ class Adminhome extends StatelessWidget {
         ),
         floatingActionButton: FloatingActionButton(
           child: Icon(Icons.add),
-          onPressed: () {},
+          onPressed: () {
+            Navigator.pushNamed(context, '/createExam');
+          },
         ));
   }
 }
