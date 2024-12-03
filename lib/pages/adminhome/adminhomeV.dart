@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:project_444/pages/adminhome/widgets/tabbar.dart';
 
 class Adminhome extends StatelessWidget {
   const Adminhome({super.key});
@@ -74,7 +75,7 @@ class Adminhome extends StatelessWidget {
         ),
       ),
       body: Center(
-        child: Text("Admin Home Page"),
+        child: AdminTabBar(),
       ),
     );
   }
