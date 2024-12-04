@@ -40,7 +40,7 @@ class _AddQuestionState extends State<AddQuestion> {
             onChanged: (value) {
               setState(() {
                 questionType = value!;
-                correctAnswer = null; // Reset correct answer selection
+                correctAnswer = null;
                 if (questionType == 'Multiple Choice') {
                   options = ['', '', '', ''];
                 }
@@ -126,10 +126,6 @@ class _AddQuestionState extends State<AddQuestion> {
               }).toList(),
             ),
           ],
-          // Placeholder for Short Answer and Essay (no options needed)
-          if (questionType == 'Short Answer' || questionType == 'Essay') ...[
-            Text('No options needed for this type of question'),
-          ],
         ],
       ),
       actions: [
@@ -150,6 +146,7 @@ class _AddQuestionState extends State<AddQuestion> {
 
             if (question.isNotEmpty &&
                 questionType.isNotEmpty &&
+                Questiongrade.isNotEmpty &&
                 (questionType == 'Short Answer' ||
                     questionType == 'Essay' ||
                     (correctAnswer != null && !hasDuplicates))) {

@@ -43,13 +43,15 @@ class _AddQuestionExamState extends State<AddQuestionExam> {
                                 color: Colors.blue,
                               ),
                             ),
-                          TextSpan(
-                            text:
-                                '\nCorrect Answer: ${_questions[index]['correctAnswer']}',
-                            style: TextStyle(
-                              color: Colors.blue,
+                          if (_questions[index]['type'] == 'True/False' ||
+                              _questions[index]['type'] == 'Multiple Choice')
+                            TextSpan(
+                              text:
+                                  '\nCorrect Answer: ${_questions[index]['correctAnswer']}',
+                              style: TextStyle(
+                                color: Colors.blue,
+                              ),
                             ),
-                          ),
                           TextSpan(
                             text:
                                 '\nGrade: ${_questions[index]['Questiongrade']}',
