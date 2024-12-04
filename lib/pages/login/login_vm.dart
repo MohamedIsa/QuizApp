@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../utils/popup.dart';
-import 'package:project_444/pages/models/userlogin.dart';
+import '../../pages/models/user.dart';
 
 Future<void> signin(BuildContext context, TextEditingController email,
     TextEditingController password) async {
@@ -17,17 +17,15 @@ Future<void> signin(BuildContext context, TextEditingController email,
 
     DocumentSnapshot userDoc =
         await firestore.collection('users').doc(userCredential.user!.uid).get();
-    LoginUser loginUser;
+    Users loginUser;
 
     if (userDoc.exists) {
-      loginUser = LoginUser(
-        id: userCredential.user!.uid,
-        email: userDoc['email'],
-        role: userDoc['role'],
-      );
+      loginUser = Users.fromFirestore(
+          userDoc.data() as Map<String, dynamic>, userCredential.user!.uid);
     } else {
-      loginUser = LoginUser(
+      loginUser = Users(
         id: userCredential.user!.uid,
+        name: '',
         email: email.text,
         role: 'student',
       );
@@ -43,7 +41,12 @@ Future<void> signin(BuildContext context, TextEditingController email,
             merge: true)); // Using merge to preserve existing fields like name
 
     showMessagealert(context, "Login successful!");
-    Navigator.of(context).pushReplacementNamed('/dashboard');
+
+    if (loginUser.role == 'admin') {
+      Navigator.of(context).pushReplacementNamed('/adminDashboard');
+    } else {
+      Navigator.of(context).pushReplacementNamed('/dashboard');
+    }
   } catch (e) {
     print('Error logging in: $e');
     String errorMessage;
