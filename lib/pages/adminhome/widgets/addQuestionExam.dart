@@ -1,9 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:project_444/pages/adminhome/widgets/EditQuestion.dart';
 import 'package:project_444/pages/adminhome/widgets/addQuestion.dart';
 
 class AddQuestionExam extends StatefulWidget {
-  const AddQuestionExam({super.key});
+  final String examId;
+  const AddQuestionExam({Key? key, required this.examId}) : super(key: key);
 
   @override
   State<AddQuestionExam> createState() => _AddQuestionExamState();
@@ -60,6 +62,73 @@ class _AddQuestionExamState extends State<AddQuestionExam> {
     setState(() {
       _questions.removeAt(index);
     });
+  }
+
+  void _createExam() async {
+    if (_questions.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Please add at least one question.")),
+      );
+      return;
+    }
+
+    try {
+      // Prepare the questions with the correct fields based on the type
+      List<Map<String, dynamic>> questionsToSave = _questions.map((question) {
+        // Generate a unique questionId for each question
+        String questionId =
+            FirebaseFirestore.instance.collection('exams').doc().id;
+
+        // Include options and correctAnswer only for Multiple Choice or True/False
+        if (question['type'] == 'Multiple Choice') {
+          return {
+            'questionId': questionId,
+            'question': question['question'],
+            'type': question['type'],
+            'options': question['options'], // Save options for multiple choice
+            'correctAnswer': question['correctAnswer'], // Save correctAnswer
+            'Questiongrade': question['Questiongrade'],
+          };
+        }
+        // Include options and correctAnswer only for Multiple Choice or True/False
+        else if (question['type'] == 'True/False') {
+          return {
+            'questionId': questionId,
+            'question': question['question'],
+            'type': question['type'],
+            'correctAnswer': question['correctAnswer'], // Save correctAnswer
+            'Questiongrade': question['Questiongrade'],
+          };
+        } else {
+          return {
+            'questionId': questionId,
+            'question': question['question'],
+            'type': question['type'],
+            'Questiongrade': question['Questiongrade'],
+          };
+        }
+      }).toList();
+
+      // Update the existing exam document by adding questions to the examId
+      await FirebaseFirestore.instance
+          .collection('exams')
+          .doc(widget.examId)
+          .update({
+        'questions': FieldValue.arrayUnion(
+            questionsToSave), // Adds new questions to the existing list
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Exam created successfully!")),
+      );
+
+      Navigator.pop(context); // Go back after successful submission
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Failed to create the exam.")),
+      );
+      print("Error saving exam: $error");
+    }
   }
 
   @override
@@ -172,17 +241,13 @@ class _AddQuestionExamState extends State<AddQuestionExam> {
               children: [
                 OutlinedButton(
                   onPressed: () {
-                    // Logic to cancel exam creation
-                    Navigator.pop(context);
+                    Navigator.pop(context); // Logic to cancel exam creation
                   },
                   child: Text("Cancel"),
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    // Add logic to create the exam
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text("Exam created successfully!")),
-                    );
+                    _createExam();
                   },
                   child: Text("Create Exam"),
                 ),

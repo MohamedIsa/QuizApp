@@ -1,5 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:project_444/pages/adminhome/widgets/addQuestionExam.dart';
 
 class AddExamWidget extends StatefulWidget {
   const AddExamWidget({super.key});
@@ -84,46 +86,90 @@ class _AddExamWidgetState extends State<AddExamWidget> {
     );
   }
 
-  void _saveExam() {
+  void _saveExam() async {
     if (_formKey.currentState!.validate()) {
+      // Check if start and end dates are selected
       if (_startDate == null || _endDate == null) {
         _showSnackBar(
-            context, 'Please select both start and end dates.', Colors.red);
+          context,
+          'Please select both start and end dates.',
+          Colors.red,
+        );
         return;
       }
 
+      // Validate that end date is not before start date
       if (_endDate!.isBefore(_startDate!)) {
         _showSnackBar(
-            context, 'End date cannot be before the start date.', Colors.red);
+          context,
+          'End date cannot be before the start date.',
+          Colors.red,
+        );
         return;
       }
 
+      // Validate duration
       int? duration = int.tryParse(_durationController.text);
       if (duration == null) {
-        _showSnackBar(context, 'Please enter a valid duration.', Colors.red);
+        _showSnackBar(
+          context,
+          'Please enter a valid duration in minutes.',
+          Colors.red,
+        );
         return;
       }
 
+      // Check if duration is within allowed time range
       Duration timeDifference = _endDate!.difference(_startDate!);
       int availableDurationInMinutes = timeDifference.inMinutes;
 
       if (duration > availableDurationInMinutes) {
         _showSnackBar(
-            context,
-            'Duration cannot be longer than the time between start and end dates.',
-            Colors.red);
+          context,
+          'Duration cannot be longer than the time between start and end dates.',
+          Colors.red,
+        );
         return;
       }
 
-      // Save the exam and questions
-      print("Exam Name: ${_examNameController.text}");
-      print("Attempts: ${_attemptsController.text}");
-      print("Duration: ${_durationController.text}");
-      print("Start Date: $_startDate");
-      print("End Date: $_endDate");
-      Navigator.pushNamed(context, '/addQuestion');
-      _showSnackBar(context, 'Exam created successfully.', Colors.green);
-      _clearExam();
+      try {
+        // Save the exam to Firestore
+        final docRef =
+            await FirebaseFirestore.instance.collection('exams').add({
+          'examName': _examNameController.text.trim(),
+          'attempts': int.tryParse(_attemptsController.text.trim()) ?? 0,
+          'duration': duration,
+          'startDate': _startDate!.toIso8601String(),
+          'endDate': _endDate!.toIso8601String(),
+        });
+
+        // Show success message
+        _showSnackBar(
+          context,
+          'Exam created successfully.',
+          Colors.green,
+        );
+
+        // Navigate to AddQuestionsPage with the created examId
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) =>
+                AddQuestionExam(examId: docRef.id), // Use docRef.id
+          ),
+        );
+
+        // Clear form after successful submission
+        _clearExam();
+      } catch (e) {
+        // Handle Firestore errors
+        _showSnackBar(
+          context,
+          'Failed to save the exam. Try again.',
+          Colors.red,
+        );
+        print("Error saving exam: $e");
+      }
     }
   }
 
