@@ -43,7 +43,7 @@ Future<void> signin(BuildContext context, TextEditingController email,
     showMessagealert(context, "Login successful!");
 
     if (loginUser.role == 'admin') {
-      Navigator.of(context).pushReplacementNamed('/adminDashboard');
+      Navigator.of(context).pushReplacementNamed('/admindashboard');
     } else {
       Navigator.of(context).pushReplacementNamed('/dashboard');
     }
