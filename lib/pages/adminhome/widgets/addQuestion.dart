@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class AddQuestion extends StatefulWidget {
-  final Function(String, String, List<String>, String?) onAddQuestion;
+  final Function(String, String, List<String>, String?, String) onAddQuestion;
 
   AddQuestion({required this.onAddQuestion});
 
@@ -12,8 +13,18 @@ class AddQuestion extends StatefulWidget {
 class _AddQuestionState extends State<AddQuestion> {
   String questionType = '';
   String question = '';
+  String Questiongrade = '';
   List<String> options = ['', '', '', ''];
   String? correctAnswer;
+// Helper method to check for duplicate options
+  bool _isDuplicateOption(String currentOption, int currentIndex) {
+    // Ignore empty options
+    if (currentOption.trim().isEmpty) return false;
+
+    // Check if this option appears in any other index
+    return options.where((option) => option == currentOption).toList().length >
+        1;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,30 +63,48 @@ class _AddQuestionState extends State<AddQuestion> {
               });
             },
           ),
+          TextFormField(
+            decoration: InputDecoration(labelText: "Enter Question Grade"),
+            keyboardType: TextInputType.number,
+            onChanged: (value) {
+              Questiongrade = value;
+            },
+            inputFormatters: [
+              FilteringTextInputFormatter.digitsOnly,
+            ],
+          ),
           // Options for multiple-choice or true/false
           if (questionType == 'Multiple Choice') ...[
-            for (int i = 0; i < 4; i++)
-              TextFormField(
-                initialValue: options[i],
-                decoration: InputDecoration(labelText: 'Option ${i + 1}'),
-                onChanged: (value) {
-                  setState(() {
-                    options[i] = value;
-                  });
-                },
-              ),
-            // Radio buttons to select the correct answer
             Column(
-              children: List.generate(options.length, (index) {
-                return RadioListTile<String>(
-                  title: Text(options[index]),
-                  value: options[index],
-                  groupValue: correctAnswer,
-                  onChanged: (value) {
-                    setState(() {
-                      correctAnswer = value;
-                    });
-                  },
+              children: List.generate(4, (index) {
+                return Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        initialValue: options[index],
+                        decoration: InputDecoration(
+                          labelText: 'Option ${index + 1}',
+                          errorText: _isDuplicateOption(options[index], index)
+                              ? 'Options must be unique'
+                              : null,
+                        ),
+                        onChanged: (value) {
+                          setState(() {
+                            options[index] = value;
+                          });
+                        },
+                      ),
+                    ),
+                    Radio<String>(
+                      value: options[index],
+                      groupValue: correctAnswer,
+                      onChanged: (value) {
+                        setState(() {
+                          correctAnswer = value;
+                        });
+                      },
+                    ),
+                  ],
                 );
               }),
             ),
@@ -112,20 +141,28 @@ class _AddQuestionState extends State<AddQuestion> {
         ),
         TextButton(
           onPressed: () {
+            // Additional check to ensure no duplicate options
+            bool hasDuplicates = options
+                    .where((option) => option.trim().isNotEmpty)
+                    .toSet()
+                    .length <
+                options.where((option) => option.trim().isNotEmpty).length;
+
             if (question.isNotEmpty &&
                 questionType.isNotEmpty &&
                 (questionType == 'Short Answer' ||
                     questionType == 'Essay' ||
-                    correctAnswer != null)) {
-              widget.onAddQuestion(
-                  questionType, question, options, correctAnswer);
-              Navigator.pop(
-                  context); // Close the dialog after adding the question
+                    (correctAnswer != null && !hasDuplicates))) {
+              widget.onAddQuestion(questionType, question, options,
+                  correctAnswer, Questiongrade);
+              Navigator.pop(context);
             } else {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                    content: Text(
-                        'Please fill in all fields and select the correct answer.')),
+                  content: Text(hasDuplicates
+                      ? 'Options must be unique'
+                      : 'Please fill in all fields and select the correct answer.'),
+                ),
               );
             }
           },

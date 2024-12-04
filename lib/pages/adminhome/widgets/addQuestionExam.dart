@@ -35,15 +35,24 @@ class _AddQuestionExamState extends State<AddQuestionExam> {
                               color: Colors.blue,
                             ),
                           ),
+                          if (_questions[index]['type'] == 'Multiple Choice')
+                            TextSpan(
+                              text:
+                                  '\nOptions: ${_questions[index]['options']}',
+                              style: TextStyle(
+                                color: Colors.blue,
+                              ),
+                            ),
                           TextSpan(
-                            text: '\nOptions: ${_questions[index]['options']}',
+                            text:
+                                '\nCorrect Answer: ${_questions[index]['correctAnswer']}',
                             style: TextStyle(
                               color: Colors.blue,
                             ),
                           ),
                           TextSpan(
                             text:
-                                '\nCorrect Answer: ${_questions[index]['correctAnswer']}',
+                                '\nGrade: ${_questions[index]['Questiongrade']}',
                             style: TextStyle(
                               color: Colors.blue,
                             ),
@@ -61,14 +70,18 @@ class _AddQuestionExamState extends State<AddQuestionExam> {
                   context: context,
                   builder: (BuildContext context) {
                     return AddQuestion(
-                      onAddQuestion: (String type, String question,
-                          List<String> options, String? correctAnswer) {
+                      onAddQuestion: (String type,
+                          String question,
+                          List<String> options,
+                          String? correctAnswer,
+                          String Questiongrade) {
                         setState(() {
                           _questions.add({
                             'type': type,
                             'question': question,
                             'options': options,
-                            'correctAnswer': correctAnswer
+                            'correctAnswer': correctAnswer,
+                            'Questiongrade': Questiongrade,
                           });
                         });
                       },
