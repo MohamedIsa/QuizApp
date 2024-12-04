@@ -2,7 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:project_444/pages/forgotpassword/forgot_v.dart';
 import 'package:project_444/pages/home/home_v.dart';
-import 'package:project_444/pages/studenthome/shome_v.dart';
+import 'package:project_444/pages/studenthome/studenthome.dart';
 import 'package:project_444/utils/loading.dart';
 import 'pages/adminhome/adminhomeV.dart';
 import 'firebase_options.dart';
@@ -25,7 +25,9 @@ void main() async {
       '/signup': (context) => SignUp(),
       '/forgotpassword': (context) => ForgotV(),
       '/completeProfile': (context) => Complete(),
-      '/dashboard': (context) => const Studenthome(),
+      '/dashboard': (context) => Studenthome(
+            name: 'name',
+          ),
       '/admindashboard': (context) => const Adminhome(),
     },
   ));
