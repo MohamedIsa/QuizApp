@@ -52,7 +52,7 @@ Future<void> registerUser(
       'role': user.role,
     });
 
-    showMessagealert(context, "Registration successful!");
+    Navigator.pushReplacementNamed(context, '/dashboard');
   } catch (e) {
     print('Error registering user: $e');
     String errorMessage;
