@@ -32,7 +32,7 @@ void main() async {
           ),
       '/admindashboard': (context) => const Adminhome(),
       '/createExam': (context) => AddExamWidget(),
-      '/addQuestion': (context) => AddQuestionExam(),
+      '/addQuestion': (context) => AddQuestionExam(examId: ""),
     },
   ));
 }
