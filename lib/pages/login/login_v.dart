@@ -94,7 +94,7 @@ class LoginPage extends StatelessWidget {
                       InkWell(
                         child: TextButton(
                           onPressed: () {
-                            Navigator.pushNamed(context, '/signup');
+                            Navigator.pushReplacementNamed(context, '/signup');
                           },
                           child: const Text(
                             'Sign Up',

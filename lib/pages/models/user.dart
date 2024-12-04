@@ -1,4 +1,3 @@
-// Original Users class remains unchanged for other parts of the app
 class Users {
   String id;
   String name;
