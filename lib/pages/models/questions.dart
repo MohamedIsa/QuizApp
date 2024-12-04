@@ -4,6 +4,8 @@ class Question {
   final String questionType;
   final String grade;
   final String? imageUrl;
+  final String? correctAnswer;
+  final List<String>? options;
 
   Question({
     required this.questionId,
@@ -11,6 +13,8 @@ class Question {
     required this.questionType,
     required this.grade,
     this.imageUrl,
+    this.correctAnswer,
+    this.options,
   });
 
   factory Question.fromFirestore(Map<String, dynamic> data, String documentId) {
@@ -20,6 +24,9 @@ class Question {
       questionType: data['questionType'] ?? '',
       grade: data['grade'] ?? '',
       imageUrl: data['imageUrl'],
+      correctAnswer: data['correctAnswer'],
+      options:
+          data['options'] != null ? List<String>.from(data['options']) : null,
     );
   }
 
@@ -29,6 +36,8 @@ class Question {
       'questionType': questionType,
       'grade': grade,
       'imageUrl': imageUrl,
+      'correctAnswer': correctAnswer,
+      'options': options,
     };
   }
 }
