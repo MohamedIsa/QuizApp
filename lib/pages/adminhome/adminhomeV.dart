@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:project_444/pages/adminhome/widgets/tabbar.dart';
+import 'package:project_444/pages/login/login_v.dart';
 
 class Adminhome extends StatelessWidget {
   const Adminhome({super.key});
@@ -29,9 +30,68 @@ class Adminhome extends StatelessWidget {
     }
   }
 
+  //======================================
+  // logout function
+  //======================================
+  Future<void> signOut() async {
+    try {
+      final FirebaseAuth _auth = FirebaseAuth.instance;
+      return await _auth.signOut();
+    } catch (e) {
+      print(e.toString());
+      return null;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        drawer: Drawer(
+          child: ListView(
+            children: [
+              DrawerHeader(
+                decoration: BoxDecoration(
+                  color: Colors.blue,
+                ),
+                child: Text(
+                  'Menu',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                  ),
+                ),
+              ),
+              ListTile(
+                leading: Icon(Icons.home),
+                title: Text('Home'),
+                onTap: () {
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.settings),
+                title: Text('Settings'),
+                onTap: () {
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.logout),
+                title: Text('Logout'),
+                onTap: () async {
+                  await signOut();
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            LoginPage()), // Replace LoginPage with your actual login page widget.
+                    (Route<dynamic> route) => false,
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
         appBar: AppBar(
           title: FutureBuilder<String>(
             future: fetchUserName(),
