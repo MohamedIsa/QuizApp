@@ -42,7 +42,7 @@ class _AddQuestionState extends State<AddQuestion> {
                 questionType = value!;
                 correctAnswer = null; // Reset correct answer selection
                 if (questionType == 'Multiple Choice') {
-                  options = ['', '', '', '']; // Reset options for MC
+                  options = ['', '', '', ''];
                 }
               });
             },
@@ -79,6 +79,15 @@ class _AddQuestionState extends State<AddQuestion> {
               children: List.generate(4, (index) {
                 return Row(
                   children: [
+                    Radio<String>(
+                      value: options[index],
+                      groupValue: correctAnswer,
+                      onChanged: (value) {
+                        setState(() {
+                          correctAnswer = value;
+                        });
+                      },
+                    ),
                     Expanded(
                       child: TextFormField(
                         initialValue: options[index],
@@ -94,15 +103,6 @@ class _AddQuestionState extends State<AddQuestion> {
                           });
                         },
                       ),
-                    ),
-                    Radio<String>(
-                      value: options[index],
-                      groupValue: correctAnswer,
-                      onChanged: (value) {
-                        setState(() {
-                          correctAnswer = value;
-                        });
-                      },
                     ),
                   ],
                 );
