@@ -4,6 +4,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../utils/popup.dart';
 import '../../pages/models/user.dart';
 
+//===================================================================
+// SignIn function
+//===================================================================
 Future<void> signin(BuildContext context, TextEditingController email,
     TextEditingController password) async {
   final FirebaseAuth auth = FirebaseAuth.instance;

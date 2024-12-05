@@ -5,8 +5,13 @@ import 'package:project_444/pages/adminhome/widgets/tabbar.dart';
 import 'package:project_444/pages/login/login_v.dart';
 
 class Adminhome extends StatelessWidget {
+  //===================================================================
+  // Adminhome constructor
+  //===================================================================
   const Adminhome({super.key});
-
+  //===================================================================
+  // fetchUserName method
+  //===================================================================
   Future<String> fetchUserName() async {
     try {
       // Get the current user's ID
@@ -43,9 +48,18 @@ class Adminhome extends StatelessWidget {
     }
   }
 
+  //===================================================================
+  // build function
+  //===================================================================
   @override
   Widget build(BuildContext context) {
+    //===================================================================
+    // Scaffold widget
+    //===================================================================
     return Scaffold(
+        //===================================================================
+        // Drawer widget
+        //===================================================================
         drawer: Drawer(
           child: ListView(
             children: [
@@ -92,6 +106,9 @@ class Adminhome extends StatelessWidget {
             ],
           ),
         ),
+        //===================================================================
+        // AppBar
+        //===================================================================
         appBar: AppBar(
           title: FutureBuilder<String>(
             future: fetchUserName(),
@@ -137,6 +154,9 @@ class Adminhome extends StatelessWidget {
             },
           ),
         ),
+        //===================================================================
+        // Body
+        //===================================================================
         body: Center(
           child: AdminTabBar(),
         ),

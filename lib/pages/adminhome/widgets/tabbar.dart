@@ -1,29 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:project_444/pages/adminhome/widgets/complete_exam_page.dart';
+import 'uncompleted_exam_page.dart';
 
 class AdminTabBar extends StatelessWidget {
-  const AdminTabBar({super.key});
+  const AdminTabBar({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
       length: 2,
-      child: Column(
-        children: [
-          TabBar(
+      child: Scaffold(
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          bottom: const TabBar(
             tabs: [
               Tab(text: "Complete Exam"),
               Tab(text: "Uncomplete Exam"),
             ],
           ),
-          Expanded(
-            child: TabBarView(
-              children: [
-                Center(child: Text('Complete Content')),
-                Center(child: Text('Uncomplete Content')),
-              ],
-            ),
-          ),
-        ],
+        ),
+        body: const TabBarView(
+          children: [
+            CompleteExamPage(),
+            UncompletedExamPage(),
+          ],
+        ),
       ),
     );
   }

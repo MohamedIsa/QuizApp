@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 
 class ReusableTextField extends StatefulWidget {
+  //===================================================================
+  // reusable text field data
+  //===================================================================
   final String hintText;
   final IconData name;
   final bool isPassword;
   final Color? color;
   final TextEditingController controller;
-
+//===================================================================
+  // reusable text field constructor
+  //==================================================================
   const ReusableTextField(
       this.hintText, this.name, this.color, this.isPassword, this.controller,
       {super.key});
@@ -17,13 +22,18 @@ class ReusableTextField extends StatefulWidget {
 
 class _ReusableTextFieldState extends State<ReusableTextField> {
   late bool _obscureText;
-
+  //===================================================================
+  // initState function
+  //===================================================================
   @override
   void initState() {
     super.initState();
     _obscureText = widget.isPassword;
   }
 
+  //===================================================================
+  // building function
+  //===================================================================
   @override
   Widget build(BuildContext context) {
     return Container(

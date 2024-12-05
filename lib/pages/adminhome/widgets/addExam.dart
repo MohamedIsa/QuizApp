@@ -4,6 +4,9 @@ import 'package:flutter/services.dart';
 import 'package:project_444/pages/adminhome/widgets/addQuestionExam.dart';
 
 class AddExamWidget extends StatefulWidget {
+  //==================================================================================
+  // AddExamWidget constructor
+  //==================================================================================
   const AddExamWidget({super.key});
 
   @override
@@ -11,14 +14,18 @@ class AddExamWidget extends StatefulWidget {
 }
 
 class _AddExamWidgetState extends State<AddExamWidget> {
+  //==================================================================================
+  // AddExamWidget text fields controllers and data
+  //==================================================================================
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _examNameController = TextEditingController();
   final TextEditingController _attemptsController = TextEditingController();
   final TextEditingController _durationController = TextEditingController();
   DateTime? _startDate;
   DateTime? _endDate;
-
-  // Pick Date and Time for Start Date
+  //==================================================================================
+  // pick a date and time for start date
+  //==================================================================================
   void _pickStartDate(BuildContext context) async {
     DateTime? pickedDate = await showDatePicker(
       context: context,
@@ -47,7 +54,9 @@ class _AddExamWidgetState extends State<AddExamWidget> {
     }
   }
 
-  // Pick Date and Time for End Date
+  //==================================================================================
+  // pick a date and time for end date
+  //==================================================================================
   void _pickEndDate(BuildContext context) async {
     DateTime? pickedDate = await showDatePicker(
       context: context,
@@ -151,7 +160,7 @@ class _AddExamWidgetState extends State<AddExamWidget> {
         );
 
         // Navigate to AddQuestionsPage with the created examId
-        Navigator.push(
+        Navigator.pushReplacement(
           context,
           MaterialPageRoute(
             builder: (context) =>
@@ -240,7 +249,7 @@ class _AddExamWidgetState extends State<AddExamWidget> {
                   ),
                   ElevatedButton(
                     onPressed: _clearExam,
-                    child: Text("Cancel"),
+                    child: Text("Clear"),
                   ),
                 ],
               ),
