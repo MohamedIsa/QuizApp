@@ -4,9 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:project_444/pages/adminhome/widgets/addQuestionExam.dart';
 
 class AddExamWidget extends StatefulWidget {
-  //==================================================================================
-  // AddExamWidget constructor
-  //==================================================================================
   const AddExamWidget({super.key});
 
   @override
@@ -14,19 +11,18 @@ class AddExamWidget extends StatefulWidget {
 }
 
 class _AddExamWidgetState extends State<AddExamWidget> {
-  //==================================================================================
-  // AddExamWidget text fields controllers and data
-  //==================================================================================
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _examNameController = TextEditingController();
   final TextEditingController _attemptsController = TextEditingController();
   final TextEditingController _durationController = TextEditingController();
   DateTime? _startDate;
   DateTime? _endDate;
+
   //==================================================================================
-  // pick a date and time for start date
+  // Helper Methods
   //==================================================================================
-  void _pickStartDate(BuildContext context) async {
+  Future<void> _pickDateTime(BuildContext context,
+      {required bool isStart}) async {
     DateTime? pickedDate = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
@@ -37,55 +33,30 @@ class _AddExamWidgetState extends State<AddExamWidget> {
     if (pickedDate != null) {
       TimeOfDay? pickedTime = await showTimePicker(
         context: context,
-        initialTime: TimeOfDay.fromDateTime(DateTime.now()),
+        initialTime: TimeOfDay.now(),
       );
 
       if (pickedTime != null) {
         setState(() {
-          _startDate = DateTime(
+          final selectedDateTime = DateTime(
             pickedDate.year,
             pickedDate.month,
             pickedDate.day,
             pickedTime.hour,
             pickedTime.minute,
           );
+
+          if (isStart) {
+            _startDate = selectedDateTime;
+          } else {
+            _endDate = selectedDateTime;
+          }
         });
       }
     }
   }
 
-  //==================================================================================
-  // pick a date and time for end date
-  //==================================================================================
-  void _pickEndDate(BuildContext context) async {
-    DateTime? pickedDate = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
-    );
-
-    if (pickedDate != null) {
-      TimeOfDay? pickedTime = await showTimePicker(
-        context: context,
-        initialTime: TimeOfDay.fromDateTime(DateTime.now()),
-      );
-
-      if (pickedTime != null) {
-        setState(() {
-          _endDate = DateTime(
-            pickedDate.year,
-            pickedDate.month,
-            pickedDate.day,
-            pickedTime.hour,
-            pickedTime.minute,
-          );
-        });
-      }
-    }
-  }
-
-  void _showSnackBar(BuildContext context, String message, Color color) {
+  void _showSnackBar(String message, Color color) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
@@ -97,92 +68,59 @@ class _AddExamWidgetState extends State<AddExamWidget> {
 
   void _saveExam() async {
     if (_formKey.currentState!.validate()) {
-      // Check if start and end dates are selected
       if (_startDate == null || _endDate == null) {
-        _showSnackBar(
-          context,
-          'Please select both start and end dates.',
-          Colors.red,
-        );
+        _showSnackBar('Please select both start and end dates.', Colors.red);
         return;
       }
 
-      // Validate that end date is not before start date
       if (_endDate!.isBefore(_startDate!)) {
-        _showSnackBar(
-          context,
-          'End date cannot be before the start date.',
-          Colors.red,
-        );
+        _showSnackBar('End date cannot be before the start date.', Colors.red);
         return;
       }
 
-      // Validate duration
       int? duration = int.tryParse(_durationController.text);
       if (duration == null) {
-        _showSnackBar(
-          context,
-          'Please enter a valid duration in minutes.',
-          Colors.red,
-        );
+        _showSnackBar('Please enter a valid duration in minutes.', Colors.red);
         return;
       }
 
-      // Check if duration is within allowed time range
       Duration timeDifference = _endDate!.difference(_startDate!);
-      int availableDurationInMinutes = timeDifference.inMinutes;
+      int availableMinutes = timeDifference.inMinutes;
 
-      if (duration > availableDurationInMinutes) {
+      if (duration > availableMinutes) {
         _showSnackBar(
-          context,
-          'Duration cannot be longer than the time between start and end dates.',
-          Colors.red,
-        );
+            'Duration cannot be longer than the time between start and end dates.',
+            Colors.red);
         return;
       }
 
+      int attempts = int.parse(_attemptsController.text.trim());
       try {
-        // Save the exam to Firestore
         final docRef =
             await FirebaseFirestore.instance.collection('exams').add({
           'examName': _examNameController.text.trim(),
-          'attempts': int.tryParse(_attemptsController.text.trim()) ?? 0,
+          'attempts': attempts,
           'duration': duration,
           'startDate': _startDate!.toIso8601String(),
           'endDate': _endDate!.toIso8601String(),
         });
 
-        // Show success message
-        _showSnackBar(
-          context,
-          'Exam created successfully.',
-          Colors.green,
-        );
-
-        // Navigate to AddQuestionsPage with the created examId
+        _showSnackBar('Exam created successfully.', Colors.green);
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) =>
-                AddQuestionExam(examId: docRef.id), // Use docRef.id
+            builder: (context) => AddQuestionExam(examId: docRef.id),
           ),
         );
 
-        // Clear form after successful submission
-        _clearExam();
+        _clearForm();
       } catch (e) {
-        // Handle Firestore errors
-        _showSnackBar(
-          context,
-          'Failed to save the exam. Try again.',
-          Colors.red,
-        );
-        print("Error saving exam: $e");
+        _showSnackBar('Failed to save the exam. Try again.', Colors.red);
       }
     }
   }
 
-  void _clearExam() {
+  void _clearForm() {
     _examNameController.clear();
     _attemptsController.clear();
     _durationController.clear();
@@ -192,10 +130,13 @@ class _AddExamWidgetState extends State<AddExamWidget> {
     });
   }
 
+  //==================================================================================
+  // Build Method
+  //==================================================================================
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Add New Exam")),
+      appBar: AppBar(title: const Text("Add New Exam")),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
@@ -204,52 +145,73 @@ class _AddExamWidgetState extends State<AddExamWidget> {
             children: [
               TextFormField(
                 controller: _examNameController,
-                decoration: InputDecoration(labelText: "Exam Name"),
+                decoration: const InputDecoration(labelText: "Exam Name"),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return "Please enter the exam name";
+                    return "Please enter the exam name.";
                   }
                   return null;
                 },
               ),
               TextFormField(
                 controller: _attemptsController,
-                decoration: InputDecoration(labelText: "Number of Attempts"),
+                decoration:
+                    const InputDecoration(labelText: "Number of Attempts"),
                 keyboardType: TextInputType.number,
-                inputFormatters: [
-                  FilteringTextInputFormatter.digitsOnly,
-                ],
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return "Please enter the number of attempts.";
+                  }
+                  int? attempts = int.tryParse(value);
+                  if (attempts == null || attempts <= 0) {
+                    return "Attempts must be greater than zero.";
+                  }
+                  return null;
+                },
               ),
               TextFormField(
                 controller: _durationController,
-                decoration: InputDecoration(labelText: "Duration (minutes)"),
+                decoration:
+                    const InputDecoration(labelText: "Duration (minutes)"),
                 keyboardType: TextInputType.number,
-                inputFormatters: [
-                  FilteringTextInputFormatter.digitsOnly,
-                ],
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return "Please enter the duration in minutes.";
+                  }
+                  int? duration = int.tryParse(value);
+                  if (duration == null || duration <= 0) {
+                    return "Duration must be a positive number.";
+                  }
+                  return null;
+                },
               ),
               ListTile(
                 title: Text(
-                    "Start Date: ${_startDate?.toLocal().toString().split(' ')[0] ?? 'Select Date'} ${_startDate != null ? _startDate!.hour.toString().padLeft(2, '0') + ":" + _startDate!.minute.toString().padLeft(2, '0') : ''}"),
-                trailing: Icon(Icons.calendar_today),
-                onTap: () => _pickStartDate(context),
+                  "Start Date: ${_startDate != null ? _startDate!.toString() : 'Select Start Date'}",
+                ),
+                trailing: const Icon(Icons.calendar_today),
+                onTap: () => _pickDateTime(context, isStart: true),
               ),
               ListTile(
                 title: Text(
-                    "End Date: ${_endDate?.toLocal().toString().split(' ')[0] ?? 'Select Date'} ${_endDate != null ? _endDate!.hour.toString().padLeft(2, '0') + ":" + _endDate!.minute.toString().padLeft(2, '0') : ''}"),
-                trailing: Icon(Icons.calendar_today),
-                onTap: () => _pickEndDate(context),
+                  "End Date: ${_endDate != null ? _endDate!.toString() : 'Select End Date'}",
+                ),
+                trailing: const Icon(Icons.calendar_today),
+                onTap: () => _pickDateTime(context, isStart: false),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   ElevatedButton(
                     onPressed: _saveExam,
-                    child: Text("Next"),
+                    child: const Text("Next"),
                   ),
                   ElevatedButton(
-                    onPressed: _clearExam,
-                    child: Text("Clear"),
+                    onPressed: _clearForm,
+                    child: const Text("Clear"),
                   ),
                 ],
               ),
