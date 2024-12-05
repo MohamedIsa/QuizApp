@@ -14,7 +14,7 @@ class _LoadingState extends State<Loading> {
     super.initState();
     // Add a delay of 3 seconds before navigating to the home page
     Future.delayed(const Duration(seconds: 3), () {
-      Navigator.pushReplacementNamed(context, '/home');
+      Navigator.pushReplacementNamed(context, '/login');
     });
   }
 

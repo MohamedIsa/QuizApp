@@ -4,19 +4,40 @@ import '../../utils/withgoogle.dart';
 import 'package:project_444/pages/login/login_vm.dart';
 
 class LoginPage extends StatelessWidget {
+  //===================================================================
+  // text fields controllers
+  //===================================================================
   final TextEditingController email = TextEditingController();
   final TextEditingController password = TextEditingController();
+  //===================================================================
+  // LoginPage constructor
+  //===================================================================
   LoginPage({super.key});
+  //===================================================================
+  // build function
+  //===================================================================
   @override
   Widget build(BuildContext context) {
+    //===================================================================
+    // Scaffold widget
+    //===================================================================
     return Scaffold(
+      //===================================================================
+      // AppBar
+      //===================================================================
       appBar: AppBar(
         title: const Text('Login Page'),
         backgroundColor: Colors.blue,
       ),
+      //===================================================================
+      // Body
+      //===================================================================
       body: SingleChildScrollView(
         child: Column(
           children: [
+            //===================================================================
+            // greeting message above the text fields
+            //===================================================================
             Container(
               padding: const EdgeInsets.all(20),
               child: const Text.rich(
@@ -34,6 +55,9 @@ class LoginPage extends StatelessWidget {
                 ),
               ),
             ),
+            //===================================================================
+            // Email text field
+            //===================================================================
             ReusableTextField(
               'Enter the Email',
               Icons.email,
@@ -41,6 +65,9 @@ class LoginPage extends StatelessWidget {
               false,
               email,
             ),
+            //===================================================================
+            // Password text field
+            //===================================================================
             ReusableTextField(
               'Enter the Password',
               Icons.lock,
@@ -48,6 +75,9 @@ class LoginPage extends StatelessWidget {
               true,
               password,
             ),
+            //===================================================================
+            // SignIn button
+            //===================================================================
             Container(
               margin: const EdgeInsets.all(16.0),
               decoration: BoxDecoration(
@@ -77,6 +107,9 @@ class LoginPage extends StatelessWidget {
                 ),
               ),
             ),
+            //===================================================================
+            // Dont have an account text
+            //===================================================================
             Container(
               padding: const EdgeInsets.only(left: 30),
               child: Column(
@@ -108,6 +141,9 @@ class LoginPage extends StatelessWidget {
                       ),
                     ],
                   ),
+                  //===================================================================
+                  // forgot your password
+                  //===================================================================
                   Align(
                     alignment: Alignment.topLeft,
                     child: TextButton(
@@ -121,6 +157,9 @@ class LoginPage extends StatelessWidget {
                   const SizedBox(
                     height: 20,
                   ),
+                  //===================================================================
+                  // text signIn with google
+                  //===================================================================
                   const Text(
                     'Or Sign In with',
                     style: TextStyle(
@@ -129,6 +168,9 @@ class LoginPage extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
+                  //===================================================================
+                  // Button to signIn with google
+                  //===================================================================
                   Container(
                     margin: const EdgeInsets.only(top: 10),
                     decoration: BoxDecoration(

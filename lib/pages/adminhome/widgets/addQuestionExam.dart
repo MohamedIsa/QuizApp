@@ -14,6 +14,28 @@ class AddQuestionExam extends StatefulWidget {
 class _AddQuestionExamState extends State<AddQuestionExam> {
   List<Map<String, dynamic>> _questions = [];
 
+  void _cancelExam() async {
+    try {
+      // Delete the exam document from Firestore
+      await FirebaseFirestore.instance
+          .collection('exams')
+          .doc(widget.examId)
+          .delete();
+
+      // Navigate back
+      Navigator.pop(context);
+    } catch (error) {
+      // Show an error message if deletion fails
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Failed to cancel exam. Please try again."),
+          backgroundColor: Colors.red,
+        ),
+      );
+      print("Error deleting exam: $error");
+    }
+  }
+
   void _addQuestionDialog() {
     showDialog(
       context: context,
@@ -134,7 +156,10 @@ class _AddQuestionExamState extends State<AddQuestionExam> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Add Questions")),
+      appBar: AppBar(
+        title: Text("Add Questions"),
+        automaticallyImplyLeading: false,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -240,9 +265,7 @@ class _AddQuestionExamState extends State<AddQuestionExam> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 OutlinedButton(
-                  onPressed: () {
-                    Navigator.pop(context); // Logic to cancel exam creation
-                  },
+                  onPressed: _cancelExam,
                   child: Text("Cancel"),
                 ),
                 ElevatedButton(
