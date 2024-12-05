@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:project_444/pages/adminhome/widgets/ExamWidget.dart';
 
 class UncompletedExamPage extends StatefulWidget {
   const UncompletedExamPage({Key? key}) : super(key: key);
@@ -71,73 +72,26 @@ class _UncompletedExamPageState extends State<UncompletedExamPage> {
         return ListView.builder(
           itemCount: exams.length,
           itemBuilder: (context, index) {
-            var exam = exams[index].data() as Map<String, dynamic>;
+            final examData = exams[index].data() as Map<String, dynamic>;
+            final startDate = DateTime.parse(examData['startDate']);
+            final endDate = DateTime.parse(examData['endDate']);
+            final examName = examData['examName'] ?? 'Unnamed Exam';
+            final attempts = examData['attempts'] ?? 0;
 
-            return Container(
-              margin: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(10),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.5),
-                    spreadRadius: 5,
-                    blurRadius: 7,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
-              ),
-              child: ListTile(
-                leading: Icon(
-                  Icons.book,
-                  color: Colors.grey, // Set default icon color
-                ),
-                title: Text(
-                  exam['examName'] ?? 'Unnamed Exam',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
-                  ),
-                ),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 8),
-                    Text(
-                      'Start Date: ${_formatDateTime(DateTime.parse(exam['startDate']))}',
-                      style: TextStyle(color: Colors.grey[700]),
-                    ),
-                    Text(
-                      'End Date: ${_formatDateTime(DateTime.parse(exam['endDate']))}',
-                      style: TextStyle(color: Colors.grey[700]),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Attempts: ${exam['attempts'] ?? 0}',
-                      style: const TextStyle(color: Colors.blue),
-                    ),
-                  ],
-                ),
-                onTap: () {
-                  // You can add functionality for the onTap event here if needed
-                },
-              ),
+            return ExamWidget(
+              examName: examName,
+              startDate: startDate,
+              endDate: endDate,
+              attempts: attempts,
+              onTap: () {
+                // Add functionality when the widget is tapped
+                debugPrint('$examName tapped!');
+              },
             );
           },
         );
       },
     );
-  }
-
-  // Helper method to format DateTime
-  String _formatDateTime(DateTime dateTime) {
-    return '${dateTime.year}-${_twoDigits(dateTime.month)}-${_twoDigits(dateTime.day)} '
-        '${_twoDigits(dateTime.hour)}:${_twoDigits(dateTime.minute)}';
-  }
-
-  // Helper method to ensure two-digit formatting
-  String _twoDigits(int n) {
-    return n.toString().padLeft(2, '0');
   }
 
   // Function to set timers dynamically based on the start time of each exam
@@ -157,11 +111,9 @@ class _UncompletedExamPageState extends State<UncompletedExamPage> {
       if (difference > 0) {
         // Set the timer to trigger when the start date is reached
         final timer = Timer(Duration(seconds: difference), () {
-          // When the timer triggers, rebuild the page and remove the completed exam
           if (mounted) {
             setState(() {
-              // Optionally, refresh or remove the completed exam manually here.
-              // This will trigger the page to rebuild after the exam is removed.
+              // Refresh or remove the completed exam manually if needed
             });
           }
         });
