@@ -1,7 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:project_444/pages/adminhome/widgets/EditQuestion.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:project_444/pages/adminhome/widgets/addQuestion.dart';
+import '../../models/questions.dart';
 
 class AddQuestionExam extends StatefulWidget {
   final String examId;
@@ -16,16 +17,12 @@ class _AddQuestionExamState extends State<AddQuestionExam> {
 
   void _cancelExam() async {
     try {
-      // Delete the exam document from Firestore
       await FirebaseFirestore.instance
           .collection('exams')
           .doc(widget.examId)
           .delete();
-
-      // Navigate back
       Navigator.pop(context);
     } catch (error) {
-      // Show an error message if deletion fails
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text("Failed to cancel exam. Please try again."),
@@ -41,15 +38,15 @@ class _AddQuestionExamState extends State<AddQuestionExam> {
       context: context,
       builder: (BuildContext context) {
         return AddQuestion(
-          onAddQuestion: (String type, String question, List<String> options,
-              String? correctAnswer, String questionGrade) {
+          onAddQuestion: (Question question) {
             setState(() {
               _questions.add({
-                'type': type,
-                'question': question,
-                'options': options,
-                'correctAnswer': correctAnswer,
-                'Questiongrade': questionGrade,
+                'type': question.questionType,
+                'question': question.questionText,
+                'options': question.options,
+                'correctAnswer': question.correctAnswer,
+                'Questiongrade': question.grade,
+                'imageUrl': question.imageUrl,
               });
             });
           },
@@ -63,15 +60,15 @@ class _AddQuestionExamState extends State<AddQuestionExam> {
       context: context,
       builder: (BuildContext context) {
         return AddQuestion(
-          onAddQuestion: (String type, String question, List<String> options,
-              String? correctAnswer, String questionGrade) {
+          onAddQuestion: (Question question) {
             setState(() {
               _questions[index] = {
-                'type': type,
-                'question': question,
-                'options': options,
-                'correctAnswer': correctAnswer,
-                'Questiongrade': questionGrade,
+                'type': question.questionType,
+                'question': question.questionText,
+                'options': question.questionType,
+                'correctAnswer': question.correctAnswer,
+                'Questiongrade': question.grade,
+                'imageUrl': question.imageUrl,
               };
             });
           },
@@ -80,7 +77,18 @@ class _AddQuestionExamState extends State<AddQuestionExam> {
     );
   }
 
-  void _removeQuestion(int index) {
+  void _removeQuestion(int index) async {
+    // Remove image from Firebase Storage if it exists
+    if (_questions[index]['imageUrl'] != null) {
+      try {
+        await FirebaseStorage.instance
+            .refFromURL(_questions[index]['imageUrl'])
+            .delete();
+      } catch (e) {
+        print('Error deleting image: $e');
+      }
+    }
+
     setState(() {
       _questions.removeAt(index);
     });
@@ -95,56 +103,45 @@ class _AddQuestionExamState extends State<AddQuestionExam> {
     }
 
     try {
-      // Prepare the questions with the correct fields based on the type
       List<Map<String, dynamic>> questionsToSave = _questions.map((question) {
-        // Generate a unique questionId for each question
         String questionId =
             FirebaseFirestore.instance.collection('exams').doc().id;
 
-        // Include options and correctAnswer only for Multiple Choice or True/False
+        // Prepare question based on type
+        var baseQuestion = {
+          'questionId': questionId,
+          'question': question['question'],
+          'type': question['type'],
+          'Questiongrade': question['Questiongrade'],
+          'imageUrl': question['imageUrl'],
+        };
+
+        // Add options and correct answer for specific question types
         if (question['type'] == 'Multiple Choice') {
-          return {
-            'questionId': questionId,
-            'question': question['question'],
-            'type': question['type'],
-            'options': question['options'], // Save options for multiple choice
-            'correctAnswer': question['correctAnswer'], // Save correctAnswer
-            'Questiongrade': question['Questiongrade'],
-          };
+          baseQuestion.addAll({
+            'options': question['options'],
+            'correctAnswer': question['correctAnswer'],
+          });
+        } else if (question['type'] == 'True/False') {
+          baseQuestion['correctAnswer'] = question['correctAnswer'];
         }
-        // Include options and correctAnswer only for Multiple Choice or True/False
-        else if (question['type'] == 'True/False') {
-          return {
-            'questionId': questionId,
-            'question': question['question'],
-            'type': question['type'],
-            'correctAnswer': question['correctAnswer'], // Save correctAnswer
-            'Questiongrade': question['Questiongrade'],
-          };
-        } else {
-          return {
-            'questionId': questionId,
-            'question': question['question'],
-            'type': question['type'],
-            'Questiongrade': question['Questiongrade'],
-          };
-        }
+
+        return baseQuestion;
       }).toList();
 
-      // Update the existing exam document by adding questions to the examId
+      // Update exam document with new questions
       await FirebaseFirestore.instance
           .collection('exams')
           .doc(widget.examId)
           .update({
-        'questions': FieldValue.arrayUnion(
-            questionsToSave), // Adds new questions to the existing list
+        'questions': FieldValue.arrayUnion(questionsToSave),
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Exam created successfully!")),
       );
 
-      Navigator.pop(context); // Go back after successful submission
+      Navigator.pop(context);
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Failed to create the exam.")),
@@ -164,7 +161,6 @@ class _AddQuestionExamState extends State<AddQuestionExam> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // Displaying the list of questions
             Expanded(
               child: ListView.builder(
                 itemCount: _questions.length,
@@ -174,71 +170,56 @@ class _AddQuestionExamState extends State<AddQuestionExam> {
                     child: ListTile(
                       title: Text(
                           '${index + 1}. ${_questions[index]['question']}'),
-                      subtitle: Text.rich(
-                        TextSpan(
-                          children: [
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text.rich(
                             TextSpan(
-                              text: 'Type: ${_questions[index]['type']}',
-                              style: TextStyle(color: Colors.blue),
+                              children: [
+                                TextSpan(
+                                  text: 'Type: ${_questions[index]['type']}',
+                                  style: TextStyle(color: Colors.blue),
+                                ),
+                                if (_questions[index]['type'] ==
+                                    'Multiple Choice')
+                                  TextSpan(
+                                    text:
+                                        '\nOptions: ${_questions[index]['options'].join(', ')}',
+                                    style: TextStyle(color: Colors.blue),
+                                  ),
+                                if (_questions[index]['type'] == 'True/False' ||
+                                    _questions[index]['type'] ==
+                                        'Multiple Choice')
+                                  TextSpan(
+                                    text:
+                                        '\nCorrect Answer: ${_questions[index]['correctAnswer']}',
+                                    style: TextStyle(color: Colors.blue),
+                                  ),
+                                TextSpan(
+                                  text:
+                                      '\nGrade: ${_questions[index]['Questiongrade']}',
+                                  style: TextStyle(color: Colors.blue),
+                                ),
+                              ],
                             ),
-                            if (_questions[index]['type'] == 'Multiple Choice')
-                              TextSpan(
-                                text:
-                                    '\nOptions: ${_questions[index]['options'].join(', ')}',
-                                style: TextStyle(color: Colors.blue),
+                          ),
+                          if (_questions[index]['imageUrl'] != null)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 8.0),
+                              child: Image.network(
+                                _questions[index]['imageUrl'],
+                                width: 100,
+                                height: 100,
+                                fit: BoxFit.cover,
                               ),
-                            if (_questions[index]['type'] == 'True/False' ||
-                                _questions[index]['type'] == 'Multiple Choice')
-                              TextSpan(
-                                text:
-                                    '\nCorrect Answer: ${_questions[index]['correctAnswer']}',
-                                style: TextStyle(color: Colors.blue),
-                              ),
-                            TextSpan(
-                              text:
-                                  '\nGrade: ${_questions[index]['Questiongrade']}',
-                              style: TextStyle(color: Colors.blue),
                             ),
-                          ],
-                        ),
+                        ],
                       ),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           IconButton(
-                            onPressed: () {
-                              showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return EditQuestion(
-                                    initialType: _questions[index]['type'],
-                                    initialQuestion: _questions[index]
-                                        ['question'],
-                                    initialOptions: _questions[index]
-                                        ['options'],
-                                    initialCorrectAnswer: _questions[index]
-                                        ['correctAnswer'],
-                                    initialGrade: _questions[index]
-                                        ['Questiongrade'],
-                                    onEditQuestion: (String type,
-                                        String question,
-                                        List<String> options,
-                                        String? correctAnswer,
-                                        String questionGrade) {
-                                      setState(() {
-                                        _questions[index] = {
-                                          'type': type,
-                                          'question': question,
-                                          'options': options,
-                                          'correctAnswer': correctAnswer,
-                                          'Questiongrade': questionGrade,
-                                        };
-                                      });
-                                    },
-                                  );
-                                },
-                              );
-                            },
+                            onPressed: () => _editQuestionDialog(index),
                             icon: Icon(Icons.edit, color: Colors.orange),
                           ),
                           IconButton(
@@ -253,14 +234,12 @@ class _AddQuestionExamState extends State<AddQuestionExam> {
               ),
             ),
             SizedBox(height: 20),
-            // Button to add a new question
             ElevatedButton.icon(
               onPressed: _addQuestionDialog,
               icon: Icon(Icons.add),
               label: Text("Add Question"),
             ),
             SizedBox(height: 20),
-            // Create Exam and Cancel buttons
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
@@ -269,9 +248,7 @@ class _AddQuestionExamState extends State<AddQuestionExam> {
                   child: Text("Cancel"),
                 ),
                 ElevatedButton(
-                  onPressed: () {
-                    _createExam();
-                  },
+                  onPressed: _createExam,
                   child: Text("Create Exam"),
                 ),
               ],
