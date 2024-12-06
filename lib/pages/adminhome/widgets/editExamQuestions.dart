@@ -1,8 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:logger/logger.dart';
 import 'dart:io';
+
+import 'package:project_444/firebase_options.dart';
 
 class EditExamQuestions extends StatefulWidget {
   final String examId;
@@ -13,475 +17,473 @@ class EditExamQuestions extends StatefulWidget {
 }
 
 class _EditExamQuestionsState extends State<EditExamQuestions> {
-  List<Map<String, dynamic>> _questions = [];
+  final Logger _logger = Logger();
   bool _isLoading = false;
+  List<Map<String, dynamic>> _questions = [];
 
   @override
   void initState() {
     super.initState();
-    _fetchExamQuestions();
+    _loadQuestions();
   }
 
-  // Fetch exam questions
-  void _fetchExamQuestions() async {
-    setState(() {
-      _isLoading = true;
-    });
-
+  Future<void> _loadQuestions() async {
+    setState(() => _isLoading = true);
     try {
-      final examDoc = await FirebaseFirestore.instance
+      final snapshot = await FirebaseFirestore.instance
           .collection('exams')
           .doc(widget.examId)
           .get();
 
-      if (examDoc.exists) {
-        final data = examDoc.data();
-        if (data != null && data['questions'] != null) {
-          setState(() {
-            _questions = List<Map<String, dynamic>>.from(data['questions']);
-          });
-        }
+      if (snapshot.exists && snapshot.data()?['questions'] != null) {
+        setState(() {
+          _questions =
+              List<Map<String, dynamic>>.from(snapshot.data()!['questions']);
+          _isLoading = false;
+        });
+      } else {
+        setState(() {
+          _questions = [];
+          _isLoading = false;
+        });
       }
     } catch (error) {
-      _showErrorSnackBar("Failed to load questions: $error");
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      _logger.e("Fetch exam questions error: $error");
+      setState(() => _isLoading = false);
     }
   }
 
-  // Show error snackbar
-  void _showErrorSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-      ),
-    );
-  }
-
-  // Dialog for adding or editing a question
-  void _showQuestionDialog({int? index}) {
-    // Determine if we're editing an existing question
-    final bool isEdit = index != null;
-
-    // Prepare initial values
-    final questionController = TextEditingController();
-    final gradeController = TextEditingController();
-
-    // Option controllers for Multiple Choice
-    final optionControllers = List.generate(4, (_) => TextEditingController());
-
-    // Initial values if editing
-    String questionType = 'Multiple Choice';
-    String? correctAnswer;
-    String? existingImageUrl;
-
-    // Populate fields if editing an existing question
-    if (isEdit) {
-      final currentQuestion = _questions[index!];
-      questionType = currentQuestion['type'] ?? 'Multiple Choice';
-      questionController.text = currentQuestion['question'] ?? '';
-      gradeController.text =
-          (currentQuestion['Questiongrade'] ?? 0.0).toString();
-      correctAnswer = currentQuestion['correctAnswer'];
-      existingImageUrl = currentQuestion['imageUrl'];
-
-      // Populate options for Multiple Choice
-      if (questionType == 'Multiple Choice' &&
-          currentQuestion['options'] != null) {
-        final options = currentQuestion['options'] as List;
-        for (int i = 0; i < options.length && i < 4; i++) {
-          optionControllers[i].text = options[i] ?? '';
-        }
-      }
-    }
-
-    // Image selection
-    File? imageFile;
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              title: Text(isEdit ? 'Edit Question' : 'Add Question'),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Question Type Dropdown
-                    DropdownButtonFormField<String>(
-                      value: questionType,
-                      decoration: InputDecoration(
-                        labelText: 'Question Type',
-                        border: OutlineInputBorder(),
-                      ),
-                      items: [
-                        'Multiple Choice',
-                        'True/False',
-                        'Short Answer',
-                        'Image'
-                      ]
-                          .map((type) =>
-                              DropdownMenuItem(value: type, child: Text(type)))
-                          .toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          questionType = value!;
-                          // Reset type-specific fields
-                          correctAnswer = null;
-                          optionControllers.forEach((c) => c.clear());
-                        });
-                      },
-                    ),
-                    SizedBox(height: 10),
-
-                    // Question Text Field
-                    TextField(
-                      controller: questionController,
-                      decoration: InputDecoration(
-                        labelText: 'Question Text',
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                    SizedBox(height: 10),
-
-                    // Grade Field
-                    TextField(
-                      controller: gradeController,
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        labelText: 'Grade',
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                    SizedBox(height: 10),
-
-                    // Type-specific fields
-                    if (questionType == 'True/False')
-                      DropdownButtonFormField<String>(
-                        value: correctAnswer,
-                        decoration: InputDecoration(
-                          labelText: 'Correct Answer',
-                          border: OutlineInputBorder(),
-                        ),
-                        items: [
-                          DropdownMenuItem(value: 'True', child: Text('True')),
-                          DropdownMenuItem(
-                              value: 'False', child: Text('False')),
-                        ],
-                        onChanged: (value) {
-                          setState(() {
-                            correctAnswer = value;
-                          });
-                        },
-                      ),
-
-                    if (questionType == 'Multiple Choice')
-                      Column(
-                        children: List.generate(
-                            4,
-                            (i) => Column(
-                                  children: [
-                                    TextField(
-                                      controller: optionControllers[i],
-                                      decoration: InputDecoration(
-                                        labelText: 'Option ${i + 1}',
-                                        border: OutlineInputBorder(),
-                                      ),
-                                    ),
-                                    if (i == 0)
-                                      DropdownButtonFormField<String>(
-                                        value: correctAnswer,
-                                        decoration: InputDecoration(
-                                          labelText: 'Correct Answer',
-                                          border: OutlineInputBorder(),
-                                        ),
-                                        items: optionControllers
-                                            .where((controller) =>
-                                                controller.text.isNotEmpty)
-                                            .map((controller) =>
-                                                DropdownMenuItem(
-                                                    value: controller.text,
-                                                    child:
-                                                        Text(controller.text)))
-                                            .toList(),
-                                        onChanged: (value) {
-                                          setState(() {
-                                            correctAnswer = value;
-                                          });
-                                        },
-                                      ),
-                                  ],
-                                )),
-                      ),
-
-                    if (questionType == 'Image')
-                      Column(
-                        children: [
-                          // Display existing or newly selected image
-                          if (existingImageUrl != null)
-                            Image.network(existingImageUrl!, height: 100),
-                          if (imageFile != null)
-                            Image.file(imageFile!, height: 100),
-
-                          ElevatedButton(
-                            onPressed: () async {
-                              final pickedFile = await ImagePicker()
-                                  .pickImage(source: ImageSource.gallery);
-                              if (pickedFile != null) {
-                                setState(() {
-                                  imageFile = File(pickedFile.path);
-                                  existingImageUrl = null;
-                                });
-                              }
-                            },
-                            child: Text('Pick Image'),
-                          ),
-                        ],
-                      ),
-                  ],
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: Text('Cancel'),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    // Validate inputs
-                    if (questionController.text.isEmpty ||
-                        gradeController.text.isEmpty) {
-                      _showErrorSnackBar('Please fill all required fields');
-                      return;
-                    }
-
-                    // Prepare question data
-                    final newQuestion = {
-                      'questionId': isEdit
-                          ? _questions[index!]['questionId']
-                          : FirebaseFirestore.instance
-                              .collection('exams')
-                              .doc()
-                              .id,
-                      'question': questionController.text,
-                      'type': questionType,
-                      'Questiongrade': double.parse(gradeController.text),
-                      'options': questionType == 'Multiple Choice'
-                          ? optionControllers
-                              .map((c) => c.text)
-                              .where((text) => text.isNotEmpty)
-                              .toList()
-                          : [],
-                      'correctAnswer': questionType == 'True/False' ||
-                              questionType == 'Multiple Choice'
-                          ? correctAnswer
-                          : null,
-                      'imageUrl': existingImageUrl
-                    };
-
-                    // Update questions list
-                    setState(() {
-                      if (isEdit) {
-                        _questions[index!] = newQuestion;
-                      } else {
-                        _questions.add(newQuestion);
-                      }
-                    });
-
-                    // Update Firestore
-                    _updateExamQuestionsList();
-
-                    Navigator.of(context).pop();
-                  },
-                  child: Text('Save'),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-  }
-
-  // Update exam questions in Firestore
-  void _updateExamQuestionsList() async {
-    setState(() {
-      _isLoading = true;
-    });
-
+  Future<void> _updateQuestion(Map<String, dynamic> questionData) async {
     try {
+      final List<Map<String, dynamic>> updatedQuestions = [..._questions];
+      final existingIndex = updatedQuestions
+          .indexWhere((q) => q['questionId'] == questionData['questionId']);
+
+      if (existingIndex >= 0) {
+        updatedQuestions[existingIndex] = questionData;
+      } else {
+        updatedQuestions.add(questionData);
+      }
+
       await FirebaseFirestore.instance
           .collection('exams')
           .doc(widget.examId)
-          .update({'questions': _questions});
+          .update({'questions': updatedQuestions});
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Exam updated successfully!"),
-          backgroundColor: Colors.green,
-        ),
-      );
-    } catch (error) {
-      _showErrorSnackBar("Failed to update exam questions: $error");
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      await _loadQuestions();
+    } catch (e) {
+      _logger.e('Update question error: $e');
     }
   }
 
-  // Remove question from Firestore
-  void _removeQuestion(int index) async {
-    // Remove image from Firebase Storage if it exists
-    final question = _questions[index];
-    if (question['imageUrl'] != null) {
-      try {
-        await FirebaseStorage.instance
-            .refFromURL(question['imageUrl'])
-            .delete();
-      } catch (e) {
-        print('Error deleting image: $e');
-      }
-    }
+  Future<void> _removeQuestion(int index) async {
+    try {
+      final List<Map<String, dynamic>> updatedQuestions = [..._questions];
+      updatedQuestions.removeAt(index);
 
-    setState(() {
-      _questions.removeAt(index);
-    });
-    _updateExamQuestionsList();
+      await FirebaseFirestore.instance
+          .collection('exams')
+          .doc(widget.examId)
+          .update({'questions': updatedQuestions});
+
+      await _loadQuestions();
+    } catch (e) {
+      _logger.e('Remove question error: $e');
+    }
+  }
+
+  void _editQuestion(Map<String, dynamic>? question) {
+    showDialog(
+      context: context,
+      builder: (context) => _QuestionEditDialog(
+        question: question,
+        onSubmit: _updateQuestion,
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Edit Exam Questions"),
+        title: Text('Edit Exam Questions'),
       ),
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
-          : Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  Expanded(
-                    child: _questions.isEmpty
-                        ? Center(
-                            child: Text(
-                              "No questions added yet",
-                              style: TextStyle(fontSize: 18),
-                            ),
-                          )
-                        : ListView.builder(
-                            itemCount: _questions.length,
-                            itemBuilder: (context, index) {
-                              final question = _questions[index];
-                              return Card(
-                                margin:
-                                    const EdgeInsets.symmetric(vertical: 8.0),
-                                child: ListTile(
-                                  title: Text(
-                                    '${index + 1}. ${question['question']}',
-                                  ),
-                                  subtitle: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text.rich(
-                                        TextSpan(
-                                          children: [
-                                            TextSpan(
-                                              text: 'Type: ${question['type']}',
-                                              style:
-                                                  TextStyle(color: Colors.blue),
-                                            ),
-                                            if (question['type'] ==
-                                                'Multiple Choice')
-                                              TextSpan(
-                                                text:
-                                                    '\nOptions: ${(question['options'] as List).join(', ')}',
-                                                style: TextStyle(
-                                                    color: Colors.blue),
-                                              ),
-                                            if (question['type'] ==
-                                                    'True/False' ||
-                                                question['type'] ==
-                                                    'Multiple Choice')
-                                              TextSpan(
-                                                text:
-                                                    '\nCorrect Answer: ${question['correctAnswer']}',
-                                                style: TextStyle(
-                                                    color: Colors.blue),
-                                              ),
-                                            TextSpan(
-                                              text:
-                                                  '\nGrade: ${question['Questiongrade']}',
-                                              style:
-                                                  TextStyle(color: Colors.blue),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      if (question['imageUrl'] != null)
-                                        Padding(
-                                          padding:
-                                              const EdgeInsets.only(top: 8.0),
-                                          child: Image.network(
-                                            question['imageUrl'],
-                                            width: 100,
-                                            height: 100,
-                                            fit: BoxFit.cover,
-                                          ),
-                                        ),
-                                    ],
-                                  ),
-                                  trailing: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      IconButton(
-                                        onPressed: () =>
-                                            _showQuestionDialog(index: index),
-                                        icon: Icon(Icons.edit,
-                                            color: Colors.orange),
-                                      ),
-                                      IconButton(
-                                        onPressed: () => _removeQuestion(index),
-                                        icon: Icon(Icons.delete,
-                                            color: Colors.red),
-                                      ),
-                                    ],
-                                  ),
+          : ListView.builder(
+              itemCount: _questions.length,
+              itemBuilder: (context, index) {
+                return Card(
+                  margin: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: ListTile(
+                    title:
+                        Text('${index + 1}. ${_questions[index]['question']}'),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text.rich(
+                          TextSpan(
+                            children: [
+                              TextSpan(
+                                text: 'Type: ${_questions[index]['type']}',
+                                style: TextStyle(color: Colors.blue),
+                              ),
+                              if (_questions[index]['type'] ==
+                                  'Multiple Choice')
+                                TextSpan(
+                                  text:
+                                      '\nOptions: ${_questions[index]['options'].join(', ')}',
+                                  style: TextStyle(color: Colors.blue),
                                 ),
-                              );
-                            },
+                              if (_questions[index]['type'] == 'True/False' ||
+                                  _questions[index]['type'] ==
+                                      'Multiple Choice')
+                                TextSpan(
+                                  text:
+                                      '\nCorrect Answer: ${_questions[index]['correctAnswer']}',
+                                  style: TextStyle(color: Colors.blue),
+                                ),
+                              TextSpan(
+                                text:
+                                    '\nGrade: ${_questions[index]['Questiongrade']}',
+                                style: TextStyle(color: Colors.blue),
+                              ),
+                            ],
                           ),
+                        ),
+                        if (_questions[index]['imageUrl'] != null)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: Image.network(
+                              _questions[index]['imageUrl'],
+                              width: 100,
+                              height: 100,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                      ],
+                    ),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          onPressed: () => _editQuestion(_questions[index]),
+                          icon: Icon(Icons.edit, color: Colors.orange),
+                        ),
+                        IconButton(
+                          onPressed: () => _removeQuestion(index),
+                          icon: Icon(Icons.delete, color: Colors.red),
+                        ),
+                      ],
+                    ),
                   ),
-                  SizedBox(height: 20),
-                  ElevatedButton.icon(
-                    onPressed: () => _showQuestionDialog(),
-                    icon: Icon(Icons.add),
-                    label: Text("Add Question"),
-                  ),
-                  SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                );
+              },
+            ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _editQuestion(null),
+        child: Icon(Icons.add),
+      ),
+    );
+  }
+}
+
+class _QuestionEditDialog extends StatefulWidget {
+  final Map<String, dynamic>? question;
+  final Function(Map<String, dynamic>) onSubmit;
+
+  const _QuestionEditDialog({
+    this.question,
+    required this.onSubmit,
+  });
+
+  @override
+  _QuestionEditDialogState createState() => _QuestionEditDialogState();
+}
+
+class _QuestionEditDialogState extends State<_QuestionEditDialog> {
+  final _formKey = GlobalKey<FormState>();
+  final ImagePicker _picker = ImagePicker();
+  final Logger _logger = Logger();
+
+  String _questionType = 'Multiple Choice';
+  String _questionText = '';
+  int _questionGrade = 0;
+  List<String> _options = List.filled(4, '');
+  String? _correctAnswer;
+  File? _imageFile;
+  String? _imageUrl;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.question != null) {
+      _initializeFromExistingQuestion();
+    }
+  }
+
+  void _initializeFromExistingQuestion() {
+    try {
+      _questionType = widget.question!['type'] ?? 'Multiple Choice';
+      _questionText = widget.question!['question'] ?? '';
+      _questionGrade =
+          (widget.question!['Questiongrade'] as num?)?.toInt() ?? 0;
+      _correctAnswer = widget.question!['correctAnswer'];
+      _imageUrl = widget.question!['imageUrl'];
+
+      if (_questionType == 'Multiple Choice') {
+        final List<dynamic>? existingOptions = widget.question!['options'];
+        if (existingOptions != null) {
+          _options = List.from(existingOptions.map((o) => o.toString()));
+          while (_options.length < 4) {
+            _options.add('');
+          }
+          _options = _options.take(4).toList();
+        }
+      }
+    } catch (e) {
+      _logger.e('Error initializing question data: $e');
+      _resetToDefaults();
+    }
+  }
+
+  void _resetToDefaults() {
+    _questionType = 'Multiple Choice';
+    _questionText = '';
+    _questionGrade = 0;
+    _options = List.filled(4, '');
+    _correctAnswer = null;
+    _imageUrl = null;
+  }
+
+  Future<void> _pickImage() async {
+    try {
+      final XFile? pickedFile = await _picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1800,
+        maxHeight: 1800,
+      );
+
+      if (pickedFile != null) {
+        setState(() {
+          _imageFile = File(pickedFile.path);
+          _imageUrl = null;
+        });
+      }
+    } catch (e) {
+      _logger.e('Image picking error: $e');
+      _showError('Failed to pick image');
+    }
+  }
+
+  Future<String?> _uploadImageToFirebase() async {
+    if (_imageFile == null) return _imageUrl;
+
+    try {
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final extension = _imageFile!.path.split('.').last;
+      String fileName = 'question_images/image_$timestamp.$extension';
+
+      Reference reference =
+          FirebaseStorage.instance.refFromURL(Bucket.ID).child(fileName);
+
+      final TaskSnapshot snapshot = await reference.putFile(_imageFile!);
+      return await snapshot.ref.getDownloadURL();
+    } catch (e) {
+      _logger.e('Image upload error: $e');
+      _showError('Failed to upload image');
+      return null;
+    }
+  }
+
+  void _showError(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
+  bool _validateForm() {
+    if (!_formKey.currentState!.validate()) return false;
+
+    if (_questionType == 'Multiple Choice') {
+      final nonEmptyOptions =
+          _options.where((o) => o.trim().isNotEmpty).toList();
+      if (nonEmptyOptions.length < 2) {
+        _showError('Please add at least 2 options');
+        return false;
+      }
+      if (_correctAnswer == null || _correctAnswer!.isEmpty) {
+        _showError('Please select a correct answer');
+        return false;
+      }
+    }
+
+    if (_questionType == 'True/False' && _correctAnswer == null) {
+      _showError('Please select True or False');
+      return false;
+    }
+
+    return true;
+  }
+
+  Future<void> _submitQuestion() async {
+    if (!_validateForm()) return;
+
+    try {
+      final imageUrl = await _uploadImageToFirebase();
+
+      final newQuestionData = {
+        'questionId': widget.question?['questionId'] ??
+            DateTime.now().millisecondsSinceEpoch.toString(),
+        'type': _questionType,
+        'question': _questionText.trim(),
+        'Questiongrade': _questionGrade,
+        'options': _questionType == 'Multiple Choice'
+            ? _options.where((o) => o.trim().isNotEmpty).toList()
+            : [],
+        'correctAnswer': _correctAnswer,
+        'imageUrl': imageUrl,
+      };
+
+      widget.onSubmit(newQuestionData);
+      if (mounted) Navigator.of(context).pop();
+    } catch (e) {
+      _logger.e('Error submitting question: $e');
+      _showError('Failed to save question');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title:
+          Text(widget.question != null ? 'Edit Question' : 'Add New Question'),
+      content: Form(
+        key: _formKey,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              DropdownButtonFormField<String>(
+                value: _questionType,
+                decoration: InputDecoration(labelText: 'Question Type'),
+                items: [
+                  'Multiple Choice',
+                  'True/False',
+                  'Short Answer',
+                  'Essay'
+                ]
+                    .map((type) =>
+                        DropdownMenuItem(value: type, child: Text(type)))
+                    .toList(),
+                validator: (value) =>
+                    value == null ? 'Please select a question type' : null,
+                onChanged: (value) {
+                  setState(() {
+                    _questionType = value!;
+                    _correctAnswer = null;
+                    _options = List.filled(4, '');
+                  });
+                },
+              ),
+              if (_imageFile == null && _imageUrl == null)
+                ElevatedButton(
+                  onPressed: _pickImage,
+                  child: Text('Add Image (Optional)'),
+                )
+              else if (_imageFile != null)
+                Column(
+                  children: [
+                    Image.file(_imageFile!, height: 100, width: 100),
+                    TextButton(
+                      onPressed: () => setState(() => _imageFile = null),
+                      child: Text('Remove Image'),
+                    ),
+                  ],
+                )
+              else if (_imageUrl != null)
+                Column(
+                  children: [
+                    Image.network(_imageUrl!, height: 100, width: 100),
+                    TextButton(
+                      onPressed: () => setState(() => _imageUrl = null),
+                      child: Text('Remove Image'),
+                    ),
+                    TextButton(
+                      onPressed: _pickImage,
+                      child: Text('Change Image'),
+                    ),
+                  ],
+                ),
+              TextFormField(
+                initialValue: _questionText,
+                decoration: InputDecoration(labelText: 'Enter Question'),
+                validator: (value) =>
+                    value?.isEmpty ?? true ? 'Question cannot be empty' : null,
+                onChanged: (value) => _questionText = value,
+              ),
+              TextFormField(
+                initialValue: _questionGrade.toString(),
+                decoration: InputDecoration(labelText: 'Question Grade'),
+                keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                validator: (value) =>
+                    value?.isEmpty ?? true ? 'Grade cannot be empty' : null,
+                onChanged: (value) => _questionGrade = int.tryParse(value) ?? 0,
+              ),
+              if (_questionType == 'Multiple Choice')
+                ...List.generate(
+                  4,
+                  (index) => Row(
                     children: [
-                      OutlinedButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: Text("Cancel"),
+                      Radio<String>(
+                        value: _options[index],
+                        groupValue: _correctAnswer,
+                        onChanged: _options[index].isNotEmpty
+                            ? (value) => setState(() => _correctAnswer = value)
+                            : null,
                       ),
-                      ElevatedButton(
-                        onPressed: _updateExamQuestionsList,
-                        child: Text("Save Exam"),
+                      Expanded(
+                        child: TextFormField(
+                          initialValue: _options[index],
+                          decoration: InputDecoration(
+                            labelText: 'Option ${index + 1}',
+                          ),
+                          onChanged: (value) {
+                            setState(() => _options[index] = value);
+                          },
+                        ),
                       ),
                     ],
                   ),
-                ],
-              ),
-            ),
+                ),
+              if (_questionType == 'True/False')
+                Column(
+                  children: ['True', 'False']
+                      .map((option) => RadioListTile<String>(
+                            title: Text(option),
+                            value: option,
+                            groupValue: _correctAnswer,
+                            onChanged: (value) =>
+                                setState(() => _correctAnswer = value),
+                          ))
+                      .toList(),
+                ),
+            ],
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text('Cancel'),
+        ),
+        ElevatedButton(
+          onPressed: _submitQuestion,
+          child: Text(widget.question != null ? 'Save' : 'Add'),
+        ),
+      ],
     );
   }
 }
