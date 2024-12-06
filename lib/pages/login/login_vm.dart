@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../utils/popup.dart';
 import '../../pages/models/user.dart';
+import 'package:project_444/pages/login/user_data.dart'; // Import the UserData class
 
 //===================================================================
 // SignIn function
@@ -33,6 +34,9 @@ Future<void> signin(BuildContext context, TextEditingController email,
         role: 'student',
       );
     }
+
+    // Save user data to UserData class
+    UserData.setUserData(loginUser.email, loginUser.name, loginUser.role);
 
     // Update Firestore with login user data
     await firestore.collection('users').doc(loginUser.id).set(

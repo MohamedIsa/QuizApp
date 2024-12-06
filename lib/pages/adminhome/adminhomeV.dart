@@ -4,6 +4,8 @@ import 'package:project_444/pages/adminhome/widgets/SearchWidgetForAdmin.dart';
 import 'package:project_444/pages/login/login_v.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:project_444/pages/adminhome/widgets/tabbar.dart';
+import 'package:flutter/material.dart';
+import 'package:project_444/pages/login/user_data.dart';
 
 class Adminhome extends StatelessWidget {
   const Adminhome({super.key});
@@ -58,23 +60,67 @@ class Adminhome extends StatelessWidget {
       drawer: Drawer(
         child: ListView(
           children: [
-            DrawerHeader(
+            UserAccountsDrawerHeader(
               decoration: BoxDecoration(
-                color: Colors.blue,
+                color: Colors.blue, // Background color
               ),
-              child: Text(
-                'Menu',
+              accountName: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "${UserData.name}",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                      color: Colors.white, // Name text color
+                    ),
+                  ),
+                  Text(
+                    "[${UserData.role.toUpperCase()}]",
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.white70, // Role text color
+                    ),
+                  ),
+                  Divider(
+                    color: Colors.blue, // Divider color
+                    thickness: 1, // Divider thickness
+                    endIndent: 0, // To ensure it spans the full width
+                    height: 1, // Space before and after divider
+                  ),
+                ],
+              ),
+              accountEmail: Text(
+                "${UserData.email}",
                 style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
+                  color: Colors.white, // Email text color
                 ),
               ),
             ),
+            // DrawerHeader(
+            //   decoration: BoxDecoration(
+            //     color: Colors.blue,
+            //   ),
+            //   child: Text(
+            //     'Menu',
+            //     style: TextStyle(
+            //       color: Colors.white,
+            //       fontSize: 24,
+            //     ),
+            //   ),
+            // ),
             ListTile(
               leading: Icon(Icons.home),
               title: Text('Home'),
               onTap: () {
                 Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.add),
+              title: Text('Create Exam'),
+              onTap: () {
+                Navigator.pushNamed(context, '/createExam');
               },
             ),
             ListTile(
