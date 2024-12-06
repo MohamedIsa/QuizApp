@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:project_444/pages/adminhome/widgets/addExam.dart';
 import 'package:project_444/pages/adminhome/widgets/addQuestionExam.dart';
 import 'package:project_444/pages/forgotpassword/forgot_v.dart';
-import 'package:project_444/pages/home/home_v.dart';
 import 'package:project_444/pages/studenthome/studenthome.dart';
 import 'package:project_444/utils/loading.dart';
 import 'pages/adminhome/adminhomeV.dart';
@@ -22,7 +21,6 @@ void main() async {
     initialRoute: '/',
     routes: {
       '/': (context) => const Loading(),
-      '/home': (context) => const HomePage(),
       '/login': (context) => LoginPage(),
       '/signup': (context) => SignUp(),
       '/forgotpassword': (context) => ForgotV(),

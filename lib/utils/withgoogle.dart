@@ -28,8 +28,6 @@ Future<void> signInWithGoogle(BuildContext context) async {
       String? userRole = await getUserRole(firebaseUser.uid);
       if (userRole == 'student') {
         Navigator.pushReplacementNamed(context, '/dashboard');
-      } else if (userRole == 'admin') {
-        Navigator.pushReplacementNamed(context, '/admindashboard');
       } else {
         Navigator.pushReplacementNamed(context, '/completeProfile');
       }
