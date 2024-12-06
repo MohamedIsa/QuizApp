@@ -85,7 +85,7 @@ class _UncompletedExamPageState extends State<UncompletedExamPage> {
               attempts: attempts,
               onTap: () {
                 // Add functionality when the widget is tapped
-                debugPrint('$examName tapped!');
+                print('$examName tapped!');
               },
             );
           },
