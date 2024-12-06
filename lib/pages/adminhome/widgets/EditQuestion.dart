@@ -7,16 +7,17 @@ class EditQuestion extends StatefulWidget {
   final List<String> initialOptions;
   final String? initialCorrectAnswer;
   final String initialGrade;
+  final String? imageUrl;
   final Function(String, String, List<String>, String?, String) onEditQuestion;
 
-  EditQuestion({
-    required this.initialType,
-    required this.initialQuestion,
-    required this.initialOptions,
-    required this.initialCorrectAnswer,
-    required this.initialGrade,
-    required this.onEditQuestion,
-  });
+  EditQuestion(
+      {required this.initialType,
+      required this.initialQuestion,
+      required this.initialOptions,
+      required this.initialCorrectAnswer,
+      required this.initialGrade,
+      required this.onEditQuestion,
+      required this.imageUrl});
 
   @override
   _EditQuestionState createState() => _EditQuestionState();
@@ -28,6 +29,7 @@ class _EditQuestionState extends State<EditQuestion> {
   late String questionGrade;
   late List<String> options;
   String? correctAnswer;
+  late String? imageUrl;
 
   @override
   void initState() {
@@ -38,6 +40,7 @@ class _EditQuestionState extends State<EditQuestion> {
     questionGrade = widget.initialGrade;
     options = List<String>.from(widget.initialOptions);
     correctAnswer = widget.initialCorrectAnswer;
+    imageUrl = widget.imageUrl;
   }
 
   // Helper method to check for duplicate options
