@@ -12,11 +12,15 @@ class UncompletedExamPage extends StatefulWidget {
 
 class _UncompletedExamPageState extends State<UncompletedExamPage> {
   late List<Timer> _timers;
+  TextEditingController searchController = TextEditingController();
+  List<QueryDocumentSnapshot> allExams = [];
+  List<QueryDocumentSnapshot> filteredExams = [];
 
   @override
   void initState() {
     super.initState();
     _timers = []; // Initialize the list of timers
+    _fetchExams(); // Fetch all exams initially
   }
 
   @override
@@ -28,69 +32,100 @@ class _UncompletedExamPageState extends State<UncompletedExamPage> {
     super.dispose();
   }
 
+  // Fetch all exams from Firestore
+  Future<void> _fetchExams() async {
+    final snapshot = await FirebaseFirestore.instance.collection('exams').get();
+    setState(() {
+      allExams = snapshot.docs;
+      filteredExams = _filterExams(allExams,
+          searchController.text); // Initialize filtered exams with all exams
+    });
+  }
+
+  // Filter exams based on search text and whether they are uncompleted (upcoming)
+  List<QueryDocumentSnapshot> _filterExams(
+      List<QueryDocumentSnapshot> exams, String query) {
+    final lowercasedQuery = query.toLowerCase();
+    final now = DateTime.now();
+
+    // Filter based on exam name and check if the exam is uncompleted (startDate is in the future)
+    return exams.where((exam) {
+      final examData = exam.data() as Map<String, dynamic>;
+      final examName = examData['examName'] ?? '';
+      final startDate = DateTime.parse(examData['startDate']);
+      final endDate = DateTime.parse(examData['endDate']);
+      final matchesQuery = examName.toLowerCase().contains(lowercasedQuery);
+      final isUncompleted =
+          now.isBefore(startDate); // Ensure the exam hasn't started yet
+
+      return matchesQuery && isUncompleted;
+    }).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance
-          .collection('exams')
-          .where('endDate', isGreaterThan: DateTime.now().toIso8601String())
-          .snapshots(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
+    return Column(
+      children: [
+        // Search Field
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: searchController,
+                  decoration: InputDecoration(
+                    labelText: 'Search Exam...',
+                    suffixIcon: IconButton(
+                      icon: Icon(Icons.clear),
+                      onPressed: () {
+                        searchController.clear();
+                        setState(() {
+                          filteredExams = _filterExams(
+                              allExams, ''); // Clear search and reset filter
+                        });
+                      },
+                    ),
+                  ),
+                  onChanged: (query) {
+                    setState(() {
+                      filteredExams = _filterExams(
+                          allExams, query); // Filter exams when search changes
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+        // Display filtered exams or original data
+        Expanded(
+          child: filteredExams.isEmpty
+              ? const Center(child: Text('No uncompleted exams found.'))
+              : ListView.builder(
+                  itemCount: filteredExams.length,
+                  itemBuilder: (context, index) {
+                    final examData =
+                        filteredExams[index].data() as Map<String, dynamic>;
+                    final startDate = DateTime.parse(examData['startDate']);
+                    final endDate = DateTime.parse(examData['endDate']);
+                    final examName = examData['examName'] ?? 'Unnamed Exam';
+                    final attempts = examData['attempts'] ?? 0;
 
-        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return const Center(
-            child: Text(
-              'No uncompleted exams found.',
-              style: TextStyle(fontSize: 16),
-            ),
-          );
-        }
-
-        final now = DateTime.now();
-        final exams = snapshot.data!.docs.where((doc) {
-          final examData = doc.data() as Map<String, dynamic>;
-          final startDate = DateTime.parse(examData['startDate']);
-          return now.isBefore(startDate); // Only show exams before startDate
-        }).toList();
-
-        // Display message if no upcoming exams
-        if (exams.isEmpty) {
-          return const Center(
-            child: Text(
-              'There are no upcoming exams.',
-              style: TextStyle(fontSize: 16),
-            ),
-          );
-        }
-
-        // Set timers dynamically based on each exam's start time
-        _setTimers(exams, now);
-
-        return ListView.builder(
-          itemCount: exams.length,
-          itemBuilder: (context, index) {
-            final examData = exams[index].data() as Map<String, dynamic>;
-            final startDate = DateTime.parse(examData['startDate']);
-            final endDate = DateTime.parse(examData['endDate']);
-            final examName = examData['examName'] ?? 'Unnamed Exam';
-            final attempts = examData['attempts'] ?? 0;
-
-            return ExamWidget(
-              examName: examName,
-              startDate: startDate,
-              endDate: endDate,
-              attempts: attempts,
-              onTap: () {
-                // Add functionality when the widget is tapped
-                print('$examName tapped!');
-              },
-            );
-          },
-        );
-      },
+                    return ExamWidget(
+                      examName: examName,
+                      startDate: startDate,
+                      endDate: endDate,
+                      attempts: attempts,
+                      onTap: () {
+                        // Add functionality when the widget is tapped
+                        print('$examName tapped!');
+                      },
+                    );
+                  },
+                ),
+        ),
+      ],
     );
   }
 

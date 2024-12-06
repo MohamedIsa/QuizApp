@@ -1,9 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:project_444/pages/login/login_v.dart';
-import 'wedgets/examsview.dart';
-
-import 'wedgets/gradeview.dart';
+import '../../utils/examsview.dart';
+import 'package:project_444/pages/login/user_data.dart';
+import '../../utils/gradeview.dart';
 
 class Studenthome extends StatefulWidget {
   final String name;
@@ -51,18 +51,56 @@ class _StudenthomeState extends State<Studenthome>
       drawer: Drawer(
         child: ListView(
           children: [
-            DrawerHeader(
+            UserAccountsDrawerHeader(
               decoration: BoxDecoration(
-                color: Colors.blue,
+                color: Colors.blue, // Background color
               ),
-              child: Text(
-                'Menu',
+              accountName: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "${UserData.name}",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                      color: Colors.white, // Name text color
+                    ),
+                  ),
+                  Text(
+                    "[${UserData.role.toUpperCase()}]",
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.white70, // Role text color
+                    ),
+                  ),
+                  Divider(
+                    color: Colors.blue, // Divider color
+                    thickness: 1, // Divider thickness
+                    endIndent: 0, // To ensure it spans the full width
+                    height: 1, // Space before and after divider
+                  ),
+                ],
+              ),
+              accountEmail: Text(
+                "${UserData.email}",
                 style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
+                  color: Colors.white, // Email text color
                 ),
               ),
             ),
+
+            // DrawerHeader(
+            //   decoration: BoxDecoration(
+            //     color: Colors.blue,
+            //   ),
+            //   child: Text(
+            //     'Menu',
+            //     style: TextStyle(
+            //       color: Colors.white,
+            //       fontSize: 24,
+            //     ),
+            //   ),
+            // ),
             ListTile(
               leading: Icon(Icons.home),
               title: Text('Home'),
@@ -95,7 +133,7 @@ class _StudenthomeState extends State<Studenthome>
         ),
       ),
       appBar: AppBar(
-        title: Text("hi,${widget.name}"),
+        title: Text("Hi, ${UserData.name} "),
         backgroundColor: Colors.blue,
         actions: [
           IconButton(
