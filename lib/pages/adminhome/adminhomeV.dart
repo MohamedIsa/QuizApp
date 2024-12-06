@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:project_444/pages/adminhome/widgets/SearchWidgetForAdmin.dart';
 import 'package:project_444/pages/login/login_v.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:project_444/pages/adminhome/widgets/tabbar.dart';
-import 'package:flutter/material.dart';
 import 'package:project_444/pages/login/user_data.dart';
 
 class Adminhome extends StatelessWidget {
@@ -200,10 +198,8 @@ class Adminhome extends StatelessWidget {
       //===================================================================
       body: Column(
         children: [
+          Expanded(child: AdminTabBar()),
           // Search widget for admin to search exams
-          Expanded(
-            child: SearchWidgetForAdmin(),
-          ),
         ],
       ),
 
