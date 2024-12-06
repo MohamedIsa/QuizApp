@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:project_444/pages/adminhome/widgets/ExamWidget.dart';
+import 'package:project_444/pages/adminhome/widgets/editExamPage.dart';
 
 class UncompletedExamPage extends StatefulWidget {
   const UncompletedExamPage({Key? key}) : super(key: key);
@@ -77,6 +78,7 @@ class _UncompletedExamPageState extends State<UncompletedExamPage> {
             final endDate = DateTime.parse(examData['endDate']);
             final examName = examData['examName'] ?? 'Unnamed Exam';
             final attempts = examData['attempts'] ?? 0;
+            final examId = exams[index].id;
 
             return ExamWidget(
               examName: examName,
@@ -84,8 +86,11 @@ class _UncompletedExamPageState extends State<UncompletedExamPage> {
               endDate: endDate,
               attempts: attempts,
               onTap: () {
-                // Add functionality when the widget is tapped
-                print('$examName tapped!');
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => EditExamPage(Eid: examId),
+                    ));
               },
             );
           },

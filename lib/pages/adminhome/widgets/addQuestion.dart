@@ -3,7 +3,6 @@ import 'package:logger/logger.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:project_444/firebase_options.dart';
 import 'dart:io';
 import '../../models/questions.dart';
 
@@ -20,7 +19,7 @@ class AddQuestionState extends State<AddQuestion> {
   final _formKey = GlobalKey<FormState>();
   String _questionType = '';
   String _questionText = '';
-  String _questionGrade = '';
+  int _questionGrade = 0; // Ensure this is an int
   List<String> _options = ['', '', '', ''];
   String? _correctAnswer;
   File? _imageFile;
@@ -66,8 +65,7 @@ class AddQuestionState extends State<AddQuestion> {
 
       _logger.i('Starting upload to path: $fileName');
 
-      Reference reference =
-          FirebaseStorage.instance.refFromURL(Bucket.ID).child(fileName);
+      Reference reference = FirebaseStorage.instance.ref().child(fileName);
 
       final TaskSnapshot snapshot = await reference.putFile(_imageFile!);
 
@@ -129,7 +127,7 @@ class AddQuestionState extends State<AddQuestion> {
       questionText: _questionText,
       options: _options,
       correctAnswer: _correctAnswer,
-      grade: _questionGrade,
+      grade: _questionGrade, // grade is now an int
       imageUrl: _imageUrl,
     );
 
@@ -208,7 +206,12 @@ class AddQuestionState extends State<AddQuestion> {
                 validator: (value) => value == null || value.isEmpty
                     ? 'Grade cannot be empty'
                     : null,
-                onChanged: (value) => _questionGrade = value,
+                onChanged: (value) {
+                  setState(() {
+                    _questionGrade =
+                        int.tryParse(value) ?? 0; // Ensure it's an integer
+                  });
+                },
               ),
               if (_questionType == 'Multiple Choice')
                 ...List.generate(

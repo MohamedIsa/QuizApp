@@ -7,15 +7,16 @@ class Exam {
   final int examDuration;
   final DateTime startTime;
   final DateTime endTime;
+  final int attempts;
 
-  Exam({
-    required this.examId,
-    required this.examName,
-    required this.questions,
-    required this.examDuration,
-    required this.startTime,
-    required this.endTime,
-  });
+  Exam(
+      {required this.examId,
+      required this.examName,
+      required this.questions,
+      required this.examDuration,
+      required this.startTime,
+      required this.endTime,
+      required this.attempts});
 
   factory Exam.fromFirestore(Map<String, dynamic> data, String documentId) {
     return Exam(
@@ -29,6 +30,7 @@ class Exam {
       examDuration: data['examDuration'] ?? 0,
       startTime: DateTime.parse(data['startTime'] ?? ''),
       endTime: DateTime.parse(data['endTime'] ?? ''),
+      attempts: data['attempts'] ?? 1,
     );
   }
 
