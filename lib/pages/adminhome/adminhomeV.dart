@@ -59,7 +59,6 @@ class Adminhome extends StatelessWidget {
         child: ListView(
           children: [
             UserAccountsDrawerHeader(
-
               decoration:
                   BoxDecoration(color: Color.fromARGB(255, 103, 80, 164)),
               accountName: Column(
@@ -88,7 +87,6 @@ class Adminhome extends StatelessWidget {
                   ),
                 ],
               ),
-
               accountEmail: Text(
                 "${UserData.email}",
                 style: TextStyle(
@@ -162,12 +160,6 @@ class Adminhome extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      IconButton(
-                        icon: Icon(Icons.person),
-                        onPressed: () {
-                          // Handle profile icon click
-                        },
-                      ),
                       Text(
                         "Hi, ${snapshot.data}",
                         style: TextStyle(fontSize: 18.0),
@@ -181,9 +173,7 @@ class Adminhome extends StatelessWidget {
                           count: 99,
                           child: Icon(Icons.notifications),
                         ),
-                        onPressed: () {
-                          // Handle notification icon click
-                        },
+                        onPressed: () {},
                       ),
                     ],
                   ),
@@ -200,7 +190,6 @@ class Adminhome extends StatelessWidget {
       body: Column(
         children: [
           Expanded(child: AdminTabBar()),
-          // Search widget for admin to search exams
         ],
       ),
 
