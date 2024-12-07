@@ -59,9 +59,8 @@ class Adminhome extends StatelessWidget {
         child: ListView(
           children: [
             UserAccountsDrawerHeader(
-              decoration: BoxDecoration(
-                color: Colors.blue, // Background color
-              ),
+              decoration:
+                  BoxDecoration(color: Color.fromARGB(255, 103, 80, 164)),
               accountName: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -81,7 +80,7 @@ class Adminhome extends StatelessWidget {
                     ),
                   ),
                   Divider(
-                    color: Colors.blue, // Divider color
+                    color: Color.fromARGB(255, 103, 80, 164), // Divider color
                     thickness: 1, // Divider thickness
                     endIndent: 0, // To ensure it spans the full width
                     height: 1, // Space before and after divider
