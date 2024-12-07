@@ -96,6 +96,7 @@ class _StudentExamState extends State<StudentExam> {
                   startDate,
                   endDate,
                   duration,
+                  attempts,
                 );
               },
             );
@@ -129,13 +130,44 @@ class _StudentExamState extends State<StudentExam> {
     }
   }
 
-  void _handleExamTap(String examId, BuildContext context, String examName,
-      DateTime startDate, DateTime endDate, int duration) {
+  void _handleExamTap(
+      String examId,
+      BuildContext context,
+      String examName,
+      DateTime startDate,
+      DateTime endDate,
+      int duration,
+      int maxAttempts) async {
     final now = DateTime.now();
 
+    // Check if the exam is active (within the start and end time)
     if (now.isAfter(startDate) && now.isBefore(endDate)) {
-      _showBottomSheet(context, examName, duration, examId);
+      try {
+        // Get the student's attempts from Firestore
+        final submissionSnapshot = await FirebaseFirestore.instance
+            .collection('exams')
+            .doc(examId)
+            .collection('studentsSubmissions')
+            .doc('studentId') // Replace with actual student ID logic
+            .get();
+
+        // Get the number of attempts made
+        final attempts = submissionSnapshot.data()?['attempts'] ?? 0;
+
+        if (attempts >= maxAttempts) {
+          // If the attempts have reached the maximum allowed attempts
+          _showDialog(context, 'Attempt Limit Reached',
+              'You have already reached the maximum number of attempts for this exam.');
+        } else {
+          // Allow the student to start the exam if they have not reached the max attempts
+          _showBottomSheet(context, examName, duration, examId);
+        }
+      } catch (e) {
+        _showDialog(context, 'Error',
+            'An error occurred while checking your exam attempts: $e');
+      }
     } else {
+      // If the exam is unavailable (either not started or expired)
       _showDialog(context, 'Exam Unavailable',
           'The exam is not available for interaction yet or has expired.');
     }
