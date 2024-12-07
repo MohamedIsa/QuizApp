@@ -76,6 +76,9 @@ class _AllExamState extends State<AllExam> {
         }),
       );
 
+      // Shuffle the questions to randomize the order each time
+      questions.shuffle();
+
       // Create a map of all question IDs
       final allQuestionIds =
           questions.map((q) => q['questionId'] as String).toSet();
@@ -195,6 +198,9 @@ class _AllExamState extends State<AllExam> {
             return q;
           }),
         );
+
+        // Shuffle the questions to randomize the order each time
+        questions.shuffle();
 
         return SingleChildScrollView(
           child: Column(
