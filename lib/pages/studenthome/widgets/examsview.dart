@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:project_444/pages/studenthome/wedgets/StudentExamWidget.dart';
-import 'package:project_444/pages/studenthome/wedgets/studentexamsession.dart';
+import 'package:project_444/pages/studenthome/widgets/StudentExamWidget.dart';
+import 'package:project_444/pages/studenthome/widgets/studentexamsession.dart';
 
 class StudentExam extends StatefulWidget {
   const StudentExam({Key? key}) : super(key: key);
