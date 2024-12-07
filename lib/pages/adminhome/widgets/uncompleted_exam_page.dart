@@ -53,7 +53,6 @@ class _UncompletedExamPageState extends State<UncompletedExamPage> {
       final examData = exam.data() as Map<String, dynamic>;
       final examName = examData['examName'] ?? '';
       final startDate = DateTime.parse(examData['startDate']);
-      final endDate = DateTime.parse(examData['endDate']);
       final matchesQuery = examName.toLowerCase().contains(lowercasedQuery);
       final isUncompleted =
           now.isBefore(startDate); // Ensure the exam hasn't started yet
