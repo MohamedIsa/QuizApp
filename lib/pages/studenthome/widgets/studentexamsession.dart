@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart'; // For Firebase Authentication
 import 'package:project_444/pages/questions/Allexam.dart';
-import 'package:project_444/pages/studenthome/widgets/countdown.dart';
 
 class Exam {
   final String examName;
@@ -31,7 +30,6 @@ class StudentExamSession extends StatefulWidget {
 class _StudentExamSessionState extends State<StudentExamSession> {
   Exam? _exam;
   String _errorMessage = '';
-  bool _isLoading = true; // Flag to track loading state
   String _userName = '';
   String _userEmail = '';
   String _sid = '';
@@ -56,18 +54,11 @@ class _StudentExamSessionState extends State<StudentExamSession> {
             docSnapshot.data() as Map<String, dynamic>,
             docSnapshot.id,
           );
-          _isLoading = false; // Data fetched, stop loading
-        });
-      } else {
-        setState(() {
-          _errorMessage = 'Exam not found';
-          _isLoading = false;
         });
       }
     } catch (e) {
       setState(() {
         _errorMessage = 'Error fetching exam details: ${e.toString()}';
-        _isLoading = false;
       });
     }
   }
@@ -118,21 +109,15 @@ class _StudentExamSessionState extends State<StudentExamSession> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Show the countdown timer only if the exam data is fetched
-              if (!_isLoading && _exam != null) ...[
-                CountdownTimer(
-                  duration: (_exam?.duration ?? 0) *
-                      60, // Convert duration to seconds
-                  onComplete: _submitExam, // Pass the callback
-                ),
-                SizedBox(height: 20),
-                AllExam(
-                  Semail: _userEmail,
-                  Sname: _userName,
-                  Sid: _sid,
-                  examId: widget.examId,
-                ),
-              ],
+              SizedBox(height: 20),
+              AllExam(
+                Semail: _userEmail,
+                Sname: _userName,
+                Sid: _sid,
+                examId: widget.examId,
+                duration: _exam?.duration ?? -1,
+              ),
+
               // Show an error message if there's any issue
               if (_errorMessage.isNotEmpty)
                 Text(

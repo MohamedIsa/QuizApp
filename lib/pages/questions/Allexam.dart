@@ -5,12 +5,14 @@ import 'package:project_444/pages/questions/msqQuestion.dart';
 import 'package:project_444/pages/questions/shortAnswerQuestion.dart';
 import 'package:project_444/pages/questions/tfquestion.dart';
 import 'package:project_444/pages/models/studentQuestionsAnswers.dart';
+import 'package:project_444/pages/studenthome/widgets/countdown.dart';
 
 class AllExam extends StatefulWidget {
   final String examId;
   final String Sid;
   final String Semail;
   final String Sname;
+  final int duration;
 
   const AllExam({
     super.key,
@@ -18,6 +20,7 @@ class AllExam extends StatefulWidget {
     required this.Sid,
     required this.Semail,
     required this.Sname,
+    required this.duration,
   });
 
   @override
@@ -25,10 +28,8 @@ class AllExam extends StatefulWidget {
 }
 
 class _AllExamState extends State<AllExam> {
-  // List to store answers
   List<StudentQuestionsAnswers> studentAnswers = [];
 
-  // Function to modify an answer in the list
   void _updateAnswer(String qid, String answerValue, int grade) {
     final index = studentAnswers.indexWhere((answer) => answer.Qid == qid);
 
@@ -49,7 +50,6 @@ class _AllExamState extends State<AllExam> {
 
   void _submitExam() async {
     try {
-      // Prepare the list of answers in the correct format
       List<Map<String, dynamic>> answersList = studentAnswers.map((answer) {
         return {
           'Qid': answer.Qid,
@@ -58,37 +58,33 @@ class _AllExamState extends State<AllExam> {
         };
       }).toList();
 
-      // Create a map of the student's answers
       Map<String, dynamic> studentExamAnswer = {
+        'Sname': widget.Sname,
         'Sid': widget.Sid,
         'Semail': widget.Semail,
         'answers': answersList,
-        'submittedAt': FieldValue.serverTimestamp(), // Timestamp of submission
+        'submittedAt': FieldValue.serverTimestamp(),
       };
 
-      // Save the document to Firebase Firestore inside the exams collection
-      // Create a subcollection 'studentsSubmissions' under the 'exams' collection
       await FirebaseFirestore.instance
           .collection('exams')
-          .doc(widget.examId) // The document name is the examId
-          .collection(
-              'studentsSubmissions') // Create subcollection for students' submissions
-          .doc(widget.Sid) // Use the student's Sid as the document ID
-          .set(
-              studentExamAnswer); // Store the student's answers inside the subcollection
+          .doc(widget.examId)
+          .collection('studentsSubmissions')
+          .doc(widget.Sid)
+          .set(studentExamAnswer);
 
-      // Show a success message
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Exam submitted successfully!")),
-      );
-
-      // Optionally, you can navigate back or reset the state
-      Navigator.pop(context);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Exam submitted successfully!")),
+        );
+        Navigator.pop(context);
+      }
     } catch (e) {
-      // Handle any errors
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: $e")),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error: $e")),
+        );
+      }
     }
   }
 
@@ -117,107 +113,111 @@ class _AllExamState extends State<AllExam> {
           return const Center(child: Text("Invalid exam data."));
         }
 
-        final questions = examData['questions'] as List<dynamic>? ?? [];
+        final questions = List<Map<String, dynamic>>.from(
+          (examData['questions'] as List<dynamic>? ?? []).map((q) {
+            if (q is! Map<String, dynamic>) {
+              return <String, dynamic>{};
+            }
+            return q;
+          }),
+        );
 
         return SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              CountdownTimer(
+                duration: widget.duration * 60,
+                onComplete: _submitExam,
+              ),
               ...questions
                   .asMap()
                   .map((index, question) {
-                    if (question is! Map) {
-                      return MapEntry(index,
-                          const SizedBox()); // Skip invalid question entries
-                    }
-
-                    final type = question['type'] as String?;
-                    final grade = question['Questiongrade'] as int?;
-                    final questionText = question['question'] as String?;
+                    final type = question['type'] as String? ?? '';
+                    final grade = question['Questiongrade'] as int? ?? 0;
+                    final questionText = question['question'] as String? ?? '';
                     final imageUrl = question['imageUrl'] as String?;
-                    final questionId = question['questionId'] as String?;
-                    final correctAnswer = question['correctAnswer'] as String?;
+                    final questionId = question['questionId'] as String? ?? '';
+                    final correctAnswer =
+                        question['correctAnswer'] as String? ?? '';
 
+                    Widget questionWidget;
                     switch (type) {
                       case "Multiple Choice":
-                        final options =
-                            (question['options'] as List<dynamic>?) ?? [];
-                        return MapEntry(
-                          index,
-                          MCQQuestion(
-                            Qid: questionId ?? '',
-                            grade: grade ?? 0,
-                            questionTxt: questionText ?? 'Unnamed Question',
-                            imgURL: imageUrl,
-                            Sid: widget.Sid,
-                            Semail: widget.Semail,
-                            Sname: widget.Sname,
-                            option1: options.length > 0 ? options[0] : '',
-                            option2: options.length > 1 ? options[1] : '',
-                            option3: options.length > 2 ? options[2] : '',
-                            option4: options.length > 3 ? options[3] : '',
-                            correctAnswer: correctAnswer ?? '',
-                            onAnswerChanged: (answer, correctAnswer) {
-                              int calculatedGrade =
-                                  (answer == correctAnswer) ? (grade ?? 0) : 0;
-                              _updateAnswer(
-                                  questionId ?? '', answer, calculatedGrade);
-                            },
-                          ),
+                        final options = List<String>.from(
+                            (question['options'] as List<dynamic>? ?? [])
+                                .map((e) => e?.toString() ?? ''));
+                        questionWidget = MCQQuestion(
+                          Qid: questionId,
+                          grade: grade,
+                          questionTxt: questionText,
+                          imgURL: imageUrl,
+                          Sid: widget.Sid,
+                          Semail: widget.Semail,
+                          Sname: widget.Sname,
+                          option1: options.isNotEmpty ? options[0] : '',
+                          option2: options.length > 1 ? options[1] : '',
+                          option3: options.length > 2 ? options[2] : '',
+                          option4: options.length > 3 ? options[3] : '',
+                          correctAnswer: correctAnswer,
+                          onAnswerChanged: (answer, correctAnswer) {
+                            int calculatedGrade =
+                                (answer == correctAnswer) ? grade : 0;
+                            _updateAnswer(questionId, answer, calculatedGrade);
+                          },
                         );
+                        break;
+
                       case "True/False":
-                        return MapEntry(
-                          index,
-                          TFQuestion(
-                            Qid: questionId ?? '',
-                            grade: grade ?? 0,
-                            questionTxt: questionText ?? 'Unnamed Question',
-                            imgURL: imageUrl,
-                            Sid: widget.Sid,
-                            Semail: widget.Semail,
-                            Sname: widget.Sname,
-                            correctAnswer: correctAnswer ?? '',
-                            onAnswerChanged: (answer, grade) {
-                              _updateAnswer(questionId ?? '', answer, grade);
-                            },
-                          ),
+                        questionWidget = TFQuestion(
+                          Qid: questionId,
+                          grade: grade,
+                          questionTxt: questionText,
+                          imgURL: imageUrl,
+                          Sid: widget.Sid,
+                          Semail: widget.Semail,
+                          Sname: widget.Sname,
+                          correctAnswer: correctAnswer,
+                          onAnswerChanged: (answer, grade) {
+                            _updateAnswer(questionId, answer, grade);
+                          },
                         );
+                        break;
+
                       case "Essay":
-                        return MapEntry(
-                          index,
-                          EssayQuestion(
-                            Qid: questionId ?? '',
-                            grade: grade ?? 0,
-                            questionTxt: questionText ?? 'Unnamed Question',
-                            imgURL: imageUrl,
-                            Sid: widget.Sid,
-                            Semail: widget.Semail,
-                            Sname: widget.Sname,
-                            onAnswerChanged: (answer) {
-                              _updateAnswer(questionId ?? '', answer, -1);
-                            },
-                          ),
+                        questionWidget = EssayQuestion(
+                          Qid: questionId,
+                          grade: grade,
+                          questionTxt: questionText,
+                          imgURL: imageUrl,
+                          Sid: widget.Sid,
+                          Semail: widget.Semail,
+                          Sname: widget.Sname,
+                          onAnswerChanged: (answer) {
+                            _updateAnswer(questionId, answer, -1);
+                          },
                         );
+                        break;
+
                       case "Short Answer":
-                        return MapEntry(
-                          index,
-                          ShortAnswerQuestion(
-                            Qid: questionId ?? '',
-                            grade: grade ?? 0,
-                            questionTxt: questionText ?? 'Unnamed Question',
-                            imgURL: imageUrl,
-                            Sid: widget.Sid,
-                            Semail: widget.Semail,
-                            Sname: widget.Sname,
-                            onAnswerChanged: (answer) {
-                              _updateAnswer(questionId ?? '', answer, -1);
-                            },
-                          ),
+                        questionWidget = ShortAnswerQuestion(
+                          Qid: questionId,
+                          grade: grade,
+                          questionTxt: questionText,
+                          imgURL: imageUrl,
+                          Sid: widget.Sid,
+                          Semail: widget.Semail,
+                          Sname: widget.Sname,
+                          onAnswerChanged: (answer) {
+                            _updateAnswer(questionId, answer, -1);
+                          },
                         );
+                        break;
+
                       default:
-                        return MapEntry(index,
-                            const SizedBox()); // Skip unknown question types
+                        questionWidget = const SizedBox();
                     }
+                    return MapEntry(index, questionWidget);
                   })
                   .values
                   .toList(),
