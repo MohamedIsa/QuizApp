@@ -50,6 +50,7 @@ class _AllExamState extends State<AllExam> {
 
   void _submitExam() async {
     try {
+      // Prepare the answers list
       List<Map<String, dynamic>> answersList = studentAnswers.map((answer) {
         return {
           'Qid': answer.Qid,
@@ -58,20 +59,37 @@ class _AllExamState extends State<AllExam> {
         };
       }).toList();
 
-      Map<String, dynamic> studentExamAnswer = {
-        'Sname': widget.Sname,
-        'Sid': widget.Sid,
-        'Semail': widget.Semail,
-        'answers': answersList,
-        'submittedAt': FieldValue.serverTimestamp(),
-      };
-
-      await FirebaseFirestore.instance
+      // Reference to the student submission document
+      final submissionRef = FirebaseFirestore.instance
           .collection('exams')
           .doc(widget.examId)
           .collection('studentsSubmissions')
-          .doc(widget.Sid)
-          .set(studentExamAnswer);
+          .doc(widget.Sid);
+
+      // Run transaction to handle attempts logic
+      await FirebaseFirestore.instance.runTransaction((transaction) async {
+        final submissionSnapshot = await transaction.get(submissionRef);
+
+        int currentAttempts = 0;
+
+        if (submissionSnapshot.exists) {
+          // If the document exists, get the current attempts count
+          currentAttempts = submissionSnapshot.data()?['attempts'] ?? 0;
+        }
+
+        // Prepare the submission data
+        Map<String, dynamic> studentExamAnswer = {
+          'Sname': widget.Sname,
+          'Sid': widget.Sid,
+          'Semail': widget.Semail,
+          'answers': answersList,
+          'submittedAt': FieldValue.serverTimestamp(),
+          'attempts': currentAttempts + 1, // Increment attempts or set to 1
+        };
+
+        // Update or create the submission document
+        transaction.set(submissionRef, studentExamAnswer);
+      });
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
