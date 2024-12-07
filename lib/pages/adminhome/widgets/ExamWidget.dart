@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class ExamWidget extends StatelessWidget {
   final String examName;
@@ -6,6 +7,7 @@ class ExamWidget extends StatelessWidget {
   final DateTime endDate;
   final int attempts;
   final VoidCallback? onTap;
+  final Color color; // New optional parameter for color
 
   const ExamWidget({
     Key? key,
@@ -14,6 +16,7 @@ class ExamWidget extends StatelessWidget {
     required this.endDate,
     required this.attempts,
     this.onTap,
+    this.color = Colors.grey, // Default color is blue
   }) : super(key: key);
 
   @override
@@ -33,15 +36,16 @@ class ExamWidget extends StatelessWidget {
         ],
       ),
       child: ListTile(
-        leading: const Icon(
+        leading: Icon(
           Icons.book,
-          color: Colors.grey,
+          color: color, // Use the color passed or default
         ),
         title: Text(
           examName,
-          style: const TextStyle(
+          style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 20,
+            color: color, // Use the color passed or default
           ),
         ),
         subtitle: Column(
@@ -59,7 +63,7 @@ class ExamWidget extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               'Attempts: $attempts',
-              style: const TextStyle(color: Colors.blue),
+              style: TextStyle(color: color), // Use the color passed or default
             ),
           ],
         ),
