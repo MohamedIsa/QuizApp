@@ -2,7 +2,7 @@ class Question {
   final String questionId;
   final String questionText;
   final String questionType;
-  final String grade;
+  final int grade;
   final String? imageUrl;
   final String? correctAnswer;
   final List<String>? options;
