@@ -4,6 +4,8 @@ import '../firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../pages/login/user_data.dart';
+
 Future<void> signInWithGoogle(BuildContext context) async {
   try {
     final GoogleSignIn googleSignIn =
@@ -26,10 +28,14 @@ Future<void> signInWithGoogle(BuildContext context) async {
     final User? firebaseUser = userCredential.user;
     if (firebaseUser != null) {
       String? userRole = await getUserRole(firebaseUser.uid);
-      if (userRole == 'student') {
-        Navigator.pushReplacementNamed(context, '/dashboard');
-      } else {
-        Navigator.pushReplacementNamed(context, '/completeProfile');
+      if (userRole != null) {
+        UserData.setUserData(
+            firebaseUser.email ?? '', firebaseUser.displayName ?? '', userRole);
+        if (userRole == 'student') {
+          Navigator.pushReplacementNamed(context, '/dashboard');
+        } else {
+          Navigator.pushReplacementNamed(context, '/completeProfile');
+        }
       }
     }
   } catch (e) {
