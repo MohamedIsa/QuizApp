@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:logger/logger.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:project_444/firebase_options.dart';
 import 'dart:io';
 import '../../models/questions.dart';
 
@@ -26,7 +26,6 @@ class AddQuestionState extends State<AddQuestion> {
   String? _imageUrl;
 
   final ImagePicker _picker = ImagePicker();
-  final Logger _logger = Logger();
 
   Future<void> _pickImage() async {
     try {
@@ -40,10 +39,8 @@ class AddQuestionState extends State<AddQuestion> {
         setState(() {
           _imageFile = File(pickedFile.path);
         });
-        _logger.i('Image picked: ${pickedFile.path}');
       }
     } catch (e) {
-      _logger.e('Image picking error: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Failed to pick image')),
@@ -54,7 +51,6 @@ class AddQuestionState extends State<AddQuestion> {
 
   Future<String?> _uploadImageToFirebase() async {
     if (_imageFile == null) {
-      _logger.e('No image file selected');
       return null;
     }
 
@@ -63,17 +59,15 @@ class AddQuestionState extends State<AddQuestion> {
       final extension = _imageFile!.path.split('.').last;
       String fileName = 'question_images/image_$timestamp.$extension';
 
-      _logger.i('Starting upload to path: $fileName');
-
-      Reference reference = FirebaseStorage.instance.ref().child(fileName);
+      Reference reference =
+          FirebaseStorage.instance.refFromURL(Bucket.ID).child(fileName);
 
       final TaskSnapshot snapshot = await reference.putFile(_imageFile!);
 
       final downloadUrl = await snapshot.ref.getDownloadURL();
-      _logger.i("URL=> $downloadUrl");
+
       return downloadUrl;
     } on FirebaseException catch (e) {
-      _logger.e('Firebase upload error: ${e.code} - ${e.message}');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Upload failed: ${e.message}')),
@@ -81,7 +75,6 @@ class AddQuestionState extends State<AddQuestion> {
       }
       return null;
     } catch (e) {
-      _logger.e('General upload error: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Upload failed')),

@@ -35,17 +35,12 @@ Future<void> signin(BuildContext context, TextEditingController email,
       );
     }
 
-    // Save user data to UserData class
     UserData.setUserData(loginUser.email, loginUser.name, loginUser.role);
 
-    // Update Firestore with login user data
-    await firestore.collection('users').doc(loginUser.id).set(
-        {
-          'email': loginUser.email,
-          'role': loginUser.role,
-        },
-        SetOptions(
-            merge: true)); // Using merge to preserve existing fields like name
+    await firestore.collection('users').doc(loginUser.id).set({
+      'email': loginUser.email,
+      'role': loginUser.role,
+    }, SetOptions(merge: true));
 
     showMessagealert(context, "Login successful!");
 
