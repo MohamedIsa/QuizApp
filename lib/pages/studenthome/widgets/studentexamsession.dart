@@ -137,6 +137,7 @@ class _StudentExamSessionState extends State<StudentExamSession> {
                             fontSize: 14, fontWeight: FontWeight.bold),
                       ),
                       SizedBox(height: 20),
+                      ElevatedButton(onPressed: () {}, child: Text('Submit'))
                     ],
                   ),
                 ),
