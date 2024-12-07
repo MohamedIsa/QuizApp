@@ -152,9 +152,10 @@ class _StudentExamState extends State<StudentExam> {
             .get();
 
         // Get the number of attempts made
-        final attempts = submissionSnapshot.data()?['attempts'] ?? 0;
+        final studentAttempts = submissionSnapshot.data()?['attempts'] ?? 0;
 
-        if (attempts >= maxAttempts) {
+        // Check if the student's attempts have reached the maximum allowed attempts
+        if (studentAttempts >= maxAttempts) {
           // If the attempts have reached the maximum allowed attempts
           _showDialog(context, 'Attempt Limit Reached',
               'You have already reached the maximum number of attempts for this exam.');
