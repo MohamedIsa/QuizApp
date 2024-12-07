@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 class StudentExamWidget extends StatelessWidget {
+  final String examId;
   final String examName;
   final DateTime startDate;
   final DateTime endDate;
@@ -9,6 +10,7 @@ class StudentExamWidget extends StatelessWidget {
   final int duration;
   const StudentExamWidget({
     Key? key,
+    required this.examId,
     required this.examName,
     required this.startDate,
     required this.endDate,
