@@ -84,7 +84,8 @@ class _StudentExamSessionState extends State<StudentExamSession> {
                   60); // Update progress based on remaining time
         });
       } else {
-        _timer.cancel(); // Stop the timer when it reaches 0
+        _timer.cancel();
+        _submit();
       }
     });
   }
@@ -100,6 +101,10 @@ class _StudentExamSessionState extends State<StudentExamSession> {
     int minutes = remainingTimeInSeconds ~/ 60; // Integer division for minutes
     int seconds = remainingTimeInSeconds % 60; // Remainder for seconds
     return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+  }
+
+  void _submit() {
+    Navigator.of(context).pop();
   }
 
   @override
@@ -137,6 +142,11 @@ class _StudentExamSessionState extends State<StudentExamSession> {
                             fontSize: 14, fontWeight: FontWeight.bold),
                       ),
                       SizedBox(height: 20),
+                      ElevatedButton(
+                          onPressed: () {
+                            _submit();
+                          },
+                          child: Text('Submit'))
                     ],
                   ),
                 ),
