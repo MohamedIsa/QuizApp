@@ -59,6 +59,7 @@ class Adminhome extends StatelessWidget {
         child: ListView(
           children: [
             UserAccountsDrawerHeader(
+
               decoration:
                   BoxDecoration(color: Color.fromARGB(255, 103, 80, 164)),
               accountName: Column(
@@ -87,6 +88,7 @@ class Adminhome extends StatelessWidget {
                   ),
                 ],
               ),
+
               accountEmail: Text(
                 "${UserData.email}",
                 style: TextStyle(
