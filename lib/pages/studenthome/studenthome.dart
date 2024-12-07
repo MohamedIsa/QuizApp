@@ -1,8 +1,12 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:project_444/pages/login/login_v.dart';
+
+import '../../utils/examsview.dart';
+import 'package:project_444/pages/login/user_data.dart';
 import 'wedgets/examsview.dart';
 import 'wedgets/gradeview.dart';
+
 
 
 class Studenthome extends StatefulWidget {
@@ -54,6 +58,7 @@ class _StudenthomeState extends State<Studenthome>
             UserAccountsDrawerHeader(
               decoration: BoxDecoration(
                 color: Colors.blue, // Background color
+
               ),
               accountName: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
