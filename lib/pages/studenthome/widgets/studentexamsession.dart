@@ -1,10 +1,13 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart'; // For Firebase Authentication
+import 'package:project_444/pages/questions/Allexam.dart';
+import 'package:project_444/pages/studenthome/widgets/countdown.dart';
 
 class Exam {
   final String examName;
-  final int duration; // Duration in minutes
+  final int duration;
 
   Exam({required this.examName, required this.duration});
 
@@ -27,16 +30,17 @@ class StudentExamSession extends StatefulWidget {
 
 class _StudentExamSessionState extends State<StudentExamSession> {
   Exam? _exam;
-  bool _isLoading = true;
   String _errorMessage = '';
-  late Timer _timer;
-  int _remainingTime = 0; // Remaining time in seconds
-  late double _progress = 0.0; // Progress for the progress bar
+  bool _isLoading = true; // Flag to track loading state
+  String _userName = '';
+  String _userEmail = '';
+  String _sid = '';
 
   @override
   void initState() {
     super.initState();
     _fetchExamDetails();
+    _fetchUserDetails();
   }
 
   Future<void> _fetchExamDetails() async {
@@ -52,14 +56,8 @@ class _StudentExamSessionState extends State<StudentExamSession> {
             docSnapshot.data() as Map<String, dynamic>,
             docSnapshot.id,
           );
-          _remainingTime =
-              (_exam?.duration ?? 0) * 60; // Convert duration to seconds
-          _progress = 1.0; // Initial progress is 100%
-          _isLoading = false;
+          _isLoading = false; // Data fetched, stop loading
         });
-
-        // Start the countdown timer
-        _startCountdown();
       } else {
         setState(() {
           _errorMessage = 'Exam not found';
@@ -74,36 +72,37 @@ class _StudentExamSessionState extends State<StudentExamSession> {
     }
   }
 
-  void _startCountdown() {
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
-      if (_remainingTime > 0) {
-        setState(() {
-          _remainingTime--; // Decrease the remaining time by 1 second
-          _progress = _remainingTime /
-              ((_exam?.duration ?? 1) *
-                  60); // Update progress based on remaining time
-        });
-      } else {
-        _timer.cancel();
-        _submit();
+  Future<void> _fetchUserDetails() async {
+    try {
+      // Get current user info from FirebaseAuth
+      User? user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        // Fetch the user data from Firestore
+        DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid) // Assuming user UID is used as document ID
+            .get();
+
+        if (userSnapshot.exists) {
+          setState(() {
+            _userName = userSnapshot['name'] ?? '';
+            _userEmail = userSnapshot['email'] ?? '';
+            _sid = user.uid; // Assuming 'Sid' is the field name
+          });
+        } else {
+          setState(() {
+            _errorMessage = 'User not found in Firestore';
+          });
+        }
       }
-    });
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Error fetching user details: ${e.toString()}';
+      });
+    }
   }
 
-  @override
-  void dispose() {
-    _timer.cancel(); // Cancel the timer when the widget is disposed
-    super.dispose();
-  }
-
-  // Function to format the time remaining as mm:ss
-  String getFormattedTime(int remainingTimeInSeconds) {
-    int minutes = remainingTimeInSeconds ~/ 60; // Integer division for minutes
-    int seconds = remainingTimeInSeconds % 60; // Remainder for seconds
-    return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-  }
-
-  void _submit() {
+  void _submitExam() {
     Navigator.of(context).pop();
   }
 
@@ -113,43 +112,37 @@ class _StudentExamSessionState extends State<StudentExamSession> {
       appBar: AppBar(
         title: Text(_exam?.examName ?? 'Exam Session'),
       ),
-      body: _isLoading
-          ? Center(
-              child:
-                  CircularProgressIndicator()) // Show loading indicator while fetching
-          : _errorMessage.isNotEmpty
-              ? Center(
-                  child: Text(
-                    _errorMessage,
-                    style: TextStyle(color: Colors.red),
-                  ),
-                )
-              : Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Progress Bar
-                      LinearProgressIndicator(
-                        value: _progress,
-                        minHeight: 8,
-                      ),
-                      SizedBox(height: 20),
-                      // Display the formatted time
-                      Text(
-                        'Time Remaining: ${getFormattedTime(_remainingTime)}',
-                        style: TextStyle(
-                            fontSize: 14, fontWeight: FontWeight.bold),
-                      ),
-                      SizedBox(height: 20),
-                      ElevatedButton(
-                          onPressed: () {
-                            _submit();
-                          },
-                          child: Text('Submit'))
-                    ],
-                  ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Show the countdown timer only if the exam data is fetched
+              if (!_isLoading && _exam != null) ...[
+                CountdownTimer(
+                  duration: (_exam?.duration ?? 0) *
+                      60, // Convert duration to seconds
+                  onComplete: _submitExam, // Pass the callback
                 ),
+                SizedBox(height: 20),
+                AllExam(
+                  Semail: _userEmail,
+                  Sname: _userName,
+                  Sid: _sid,
+                  examId: widget.examId,
+                ),
+              ],
+              // Show an error message if there's any issue
+              if (_errorMessage.isNotEmpty)
+                Text(
+                  _errorMessage,
+                  style: TextStyle(color: Colors.red, fontSize: 16),
+                ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
