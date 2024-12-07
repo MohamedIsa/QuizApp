@@ -13,24 +13,21 @@ class Adminhome extends StatelessWidget {
   //===================================================================
   Future<String> fetchUserName() async {
     try {
-      // Get the current user's ID
       final userId = FirebaseAuth.instance.currentUser?.uid;
 
       if (userId != null) {
-        // Fetch user document from Firestore
         final userDoc = await FirebaseFirestore.instance
             .collection('users')
             .doc(userId)
             .get();
 
         if (userDoc.exists) {
-          return userDoc.data()?['name'] ??
-              'User'; // Fallback to 'User' if 'name' is null
+          return userDoc.data()?['name'] ?? 'User';
         }
       }
-      return 'User'; // Fallback if userId is null or userDoc doesn't exist
+      return 'User';
     } catch (e) {
-      return 'User'; // Fallback in case of an error
+      return 'User';
     }
   }
 
@@ -59,7 +56,6 @@ class Adminhome extends StatelessWidget {
         child: ListView(
           children: [
             UserAccountsDrawerHeader(
-
               decoration:
                   BoxDecoration(color: Color.fromARGB(255, 103, 80, 164)),
               accountName: Column(
@@ -70,44 +66,31 @@ class Adminhome extends StatelessWidget {
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 20,
-                      color: Colors.white, // Name text color
+                      color: Colors.white,
                     ),
                   ),
                   Text(
                     "[${UserData.role.toUpperCase()}]",
                     style: TextStyle(
                       fontSize: 12,
-                      color: Colors.white70, // Role text color
+                      color: Colors.white70,
                     ),
                   ),
                   Divider(
-                    color: Color.fromARGB(255, 103, 80, 164), // Divider color
-                    thickness: 1, // Divider thickness
-                    endIndent: 0, // To ensure it spans the full width
-                    height: 1, // Space before and after divider
+                    color: Color.fromARGB(255, 103, 80, 164),
+                    thickness: 1,
+                    endIndent: 0,
+                    height: 1,
                   ),
                 ],
               ),
-
               accountEmail: Text(
                 "${UserData.email}",
                 style: TextStyle(
-                  color: Colors.white, // Email text color
+                  color: Colors.white,
                 ),
               ),
             ),
-            // DrawerHeader(
-            //   decoration: BoxDecoration(
-            //     color: Colors.blue,
-            //   ),
-            //   child: Text(
-            //     'Menu',
-            //     style: TextStyle(
-            //       color: Colors.white,
-            //       fontSize: 24,
-            //     ),
-            //   ),
-            // ),
             ListTile(
               leading: Icon(Icons.home),
               title: Text('Home'),
@@ -162,12 +145,6 @@ class Adminhome extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      IconButton(
-                        icon: Icon(Icons.person),
-                        onPressed: () {
-                          // Handle profile icon click
-                        },
-                      ),
                       Text(
                         "Hi, ${snapshot.data}",
                         style: TextStyle(fontSize: 18.0),
@@ -181,9 +158,7 @@ class Adminhome extends StatelessWidget {
                           count: 99,
                           child: Icon(Icons.notifications),
                         ),
-                        onPressed: () {
-                          // Handle notification icon click
-                        },
+                        onPressed: () {},
                       ),
                     ],
                   ),
@@ -200,7 +175,6 @@ class Adminhome extends StatelessWidget {
       body: Column(
         children: [
           Expanded(child: AdminTabBar()),
-          // Search widget for admin to search exams
         ],
       ),
 

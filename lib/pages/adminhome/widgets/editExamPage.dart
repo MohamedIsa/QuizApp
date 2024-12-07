@@ -228,7 +228,7 @@ class _EditExamPageState extends State<EditExamPage> {
                 onTap: () => _pickDateTime(context, isStart: false),
               ),
               const SizedBox(height: 20),
-              Row(
+              Column(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   ElevatedButton(
