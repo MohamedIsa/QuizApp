@@ -1,6 +1,6 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:project_444/pages/adminhome/widgets/ExamAnswers.dart';
 import 'package:project_444/pages/adminhome/widgets/ExamWidget.dart';
 
 class CompleteExamPage extends StatefulWidget {
@@ -11,147 +11,197 @@ class CompleteExamPage extends StatefulWidget {
 }
 
 class _CompleteExamPageState extends State<CompleteExamPage> {
-  late List<Timer> _timers;
-  TextEditingController searchController = TextEditingController();
-  List<QueryDocumentSnapshot> allExams = [];
-  List<QueryDocumentSnapshot> filteredExams = [];
-
-  @override
-  void initState() {
-    super.initState();
-    _timers = []; // Initialize the list of timers
-    _fetchExams(); // Fetch all exams initially
-  }
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
 
   @override
   void dispose() {
-    // Cancel all timers when the widget is disposed
-    for (var timer in _timers) {
-      timer.cancel();
-    }
+    _searchController.dispose();
     super.dispose();
   }
 
-  // Fetch all exams from Firestore
-  Future<void> _fetchExams() async {
-    final snapshot = await FirebaseFirestore.instance.collection('exams').get();
-    setState(() {
-      allExams = snapshot.docs;
-      filteredExams = _filterExams(allExams,
-          searchController.text); // Initialize filtered exams with all exams
-    });
-  }
+  // Check if any answer has a grade of -1
+  bool _hasUngradedAnswer(List<dynamic>? answers) {
+    if (answers == null || answers.isEmpty) return false;
 
-  // Filter exams based on search text and whether they are completed (endDate is in the past)
-  List<QueryDocumentSnapshot> _filterExams(
-      List<QueryDocumentSnapshot> exams, String query) {
-    final lowercasedQuery = query.toLowerCase();
-    final now = DateTime.now();
-
-    // Filter based on exam name and check if the exam is completed (endDate is in the past)
-    return exams.where((exam) {
-      final examData = exam.data() as Map<String, dynamic>;
-      final examName = examData['examName'] ?? '';
-      final endDate = DateTime.parse(examData['endDate']);
-      final matchesQuery = examName.toLowerCase().contains(lowercasedQuery);
-      final isCompleted = now.isAfter(endDate); // Ensure the exam is completed
-
-      return matchesQuery && isCompleted;
-    }).toList();
+    return answers.any(
+        (answer) => answer is Map<String, dynamic> && answer['grade'] == -1);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // Search Field
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: searchController,
-                  decoration: InputDecoration(
-                    labelText: 'Search Exam...',
-                    suffixIcon: IconButton(
-                      icon: Icon(Icons.clear),
-                      onPressed: () {
-                        searchController.clear();
-                        setState(() {
-                          filteredExams = _filterExams(
-                              allExams, ''); // Clear search and reset filter
-                        });
-                      },
-                    ),
-                  ),
-                  onChanged: (query) {
+    return Scaffold(
+      body: Column(
+        children: [
+          // Search Field
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                labelText: 'Search Completed Exams...',
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.clear),
+                  onPressed: () {
+                    _searchController.clear();
                     setState(() {
-                      filteredExams = _filterExams(
-                          allExams, query); // Filter exams when search changes
+                      _searchQuery = '';
                     });
                   },
                 ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
-            ],
+              onChanged: (query) {
+                setState(() {
+                  _searchQuery = query.toLowerCase();
+                });
+              },
+            ),
           ),
-        ),
-        // Display filtered exams or original data
-        Expanded(
-          child: filteredExams.isEmpty
-              ? const Center(child: Text('No completed exams found.'))
-              : ListView.builder(
-                  itemCount: filteredExams.length,
-                  itemBuilder: (context, index) {
-                    final examData =
-                        filteredExams[index].data() as Map<String, dynamic>;
-                    final startDate = DateTime.parse(examData['startDate']);
-                    final endDate = DateTime.parse(examData['endDate']);
-                    final examName = examData['examName'] ?? 'Unnamed Exam';
-                    final attempts = examData['attempts'] ?? 0;
 
-                    return ExamWidget(
-                      examName: examName,
-                      startDate: startDate,
-                      endDate: endDate,
-                      attempts: attempts,
-                      onTap: () {
-                        // Add functionality when the widget is tapped
-                        debugPrint('$examName tapped!');
+          // Stream Builder for Real-time Exams
+          Expanded(
+            child: StreamBuilder<QuerySnapshot>(
+              stream:
+                  FirebaseFirestore.instance.collection('exams').snapshots(),
+              builder: (context, snapshot) {
+                // Loading state
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                // Error state
+                if (snapshot.hasError) {
+                  return Center(
+                    child: Text('Error: ${snapshot.error}'),
+                  );
+                }
+
+                // No data
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return const Center(
+                    child: Text('No exams found.'),
+                  );
+                }
+
+                // Filter and process exams
+                final now = DateTime.now();
+                final completedExams = snapshot.data!.docs.where((exam) {
+                  final examData = exam.data() as Map<String, dynamic>;
+                  final endDate = DateTime.parse(examData['endDate']);
+                  final examName = (examData['examName'] ?? '').toLowerCase();
+
+                  // Check if exam is completed and matches search query
+                  return now.isAfter(endDate) &&
+                      examName.contains(_searchQuery);
+                }).toList();
+
+                // StreamBuilder for listening to student submissions
+                return StreamBuilder<QuerySnapshot>(
+                  stream: FirebaseFirestore.instance
+                      .collection('exams')
+                      .snapshots(),
+                  builder: (context, submissionsSnapshot) {
+                    // Loading state
+                    if (submissionsSnapshot.connectionState ==
+                        ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    // Check for ungraded answers for each exam
+                    return ListView.builder(
+                      itemCount: completedExams.length,
+                      itemBuilder: (context, index) {
+                        final examDoc = completedExams[index];
+                        final examData = examDoc.data() as Map<String, dynamic>;
+
+                        final examName = examData['examName'] ?? 'Unnamed Exam';
+                        final startDate = DateTime.parse(examData['startDate']);
+                        final endDate = DateTime.parse(examData['endDate']);
+                        final attempts = examData['attempts'] ?? 0;
+                        final examId = examDoc.id;
+
+                        // Check for ungraded answers
+                        return StreamBuilder<QuerySnapshot>(
+                          stream: FirebaseFirestore.instance
+                              .collection('exams')
+                              .doc(examId)
+                              .collection('studentsSubmissions')
+                              .snapshots(),
+                          builder: (context, submissionSnapshot) {
+                            if (!submissionSnapshot.hasData) {
+                              return Container(); // Skip if no data
+                            }
+
+                            final submissions = submissionSnapshot.data!.docs;
+
+                            final hasUngradedAnswers = submissions.any(
+                                (submission) =>
+                                    _hasUngradedAnswer(submission['answers']));
+
+                            // Set the widget color based on ungraded answers
+                            return ExamWidget(
+                              examName: examName,
+                              startDate: startDate,
+                              endDate: endDate,
+                              attempts: attempts,
+                              color: hasUngradedAnswers
+                                  ? Colors.orange
+                                  : Colors.grey,
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ExamAnswers(
+                                      Eid: examId,
+                                      ExamName: examName,
+                                    ),
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                        );
                       },
                     );
                   },
-                ),
-        ),
-      ],
+                );
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
 
-  // Function to set timers dynamically based on the end time of each exam
-  void _setTimers(List<QueryDocumentSnapshot> exams, DateTime now) {
-    // Cancel previous timers
-    for (var timer in _timers) {
-      timer.cancel();
-    }
-    _timers.clear(); // Clear the list of timers
+  // Check for ungraded answers across all completed exams
+  Future<List<String>> _checkUngradedAnswers(
+      List<QueryDocumentSnapshot> completedExams) async {
+    final List<String> examsWithUngradedAnswers = [];
 
-    for (var exam in exams) {
-      final examData = exam.data() as Map<String, dynamic>;
-      final endDate = DateTime.parse(examData['endDate']);
-      final difference = now.difference(endDate).inSeconds;
+    for (var exam in completedExams) {
+      final submissionsSnapshot = await FirebaseFirestore.instance
+          .collection('exams')
+          .doc(exam.id)
+          .collection('studentsSubmissions')
+          .get();
 
-      // Only set a timer if the end date is in the past
-      if (difference > 0) {
-        // Set the timer to trigger when the end date is reached
-        final timer = Timer(Duration(seconds: difference), () {
-          if (mounted) {
-            setState(() {
-              // Optionally, refresh or remove the completed exam manually here.
-            });
-          }
-        });
-        _timers.add(timer); // Add the timer to the list
+      // Check if any submission has an ungraded answer
+      final hasUngradedAnswers = submissionsSnapshot.docs.any((submission) {
+        final submissionData = submission.data();
+        final answers = submissionData['answers'] as List<dynamic>?;
+
+        return _hasUngradedAnswer(answers);
+      });
+
+      if (hasUngradedAnswers) {
+        examsWithUngradedAnswers.add(exam.id);
       }
     }
+
+    return examsWithUngradedAnswers;
   }
 }
