@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
+import 'package:project_444/constant.dart';
 
 class StudentGradingPage extends StatefulWidget {
   final String Sid;
@@ -127,19 +128,16 @@ class _StudentGradingPageState extends State<StudentGradingPage> {
         'feedback': feedbackController.text,
         'totalGrade': totalGrade,
       });
-
+      Navigator.pop(context);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text("Grades and feedback saved successfully!")),
-        );
+        SnackbarUtils.showSuccessSnackbar(
+            context, 'Grades and feedback saved successfully!');
       }
     } catch (e) {
       print("Error saving grades and feedback: $e");
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Error saving grades and feedback: $e")),
-        );
+        SnackbarUtils.showErrorSnackbar(
+            context, 'Error saving grades and feedback');
       }
     }
   }
@@ -165,10 +163,19 @@ class _StudentGradingPageState extends State<StudentGradingPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Grading Page"),
+        iconTheme: IconThemeData(color: AppColors.buttonTextColor),
+        centerTitle: true,
+        backgroundColor: AppColors.appBarColor,
+        title: const Text(
+          "Grading Page",
+          style: TextStyle(color: AppColors.buttonTextColor),
+        ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.save),
+            icon: const Icon(
+              Icons.save,
+              color: AppColors.buttonTextColor,
+            ),
             onPressed: saveGradesAndFeedback,
           ),
         ],
@@ -200,6 +207,10 @@ class _StudentGradingPageState extends State<StudentGradingPage> {
               if (index == questionsAndAnswers.length) {
                 return Card(
                   margin: const EdgeInsets.all(8.0),
+                  elevation: 4, // Optional: Add elevation for shadow effect
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10), // Rounded corners
+                  ),
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Column(
@@ -208,14 +219,39 @@ class _StudentGradingPageState extends State<StudentGradingPage> {
                         const Text(
                           "Feedback",
                           style: TextStyle(
-                              fontSize: 16.0, fontWeight: FontWeight.bold),
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.bold,
+                            color:
+                                AppColors.textBlack, // Custom color if needed
+                          ),
                         ),
                         const SizedBox(height: 8.0),
                         TextField(
                           controller: feedbackController,
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                             labelText: "Admin's Feedback",
-                            border: OutlineInputBorder(),
+                            labelStyle: const TextStyle(
+                                color: AppColors.textBlack), // Label color
+                            border: OutlineInputBorder(
+                              borderRadius:
+                                  BorderRadius.circular(10), // Rounded corners
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                  color: AppColors.appBarColor,
+                                  width: 2), // Border color when focused
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                  color: AppColors
+                                      .textBlack), // Border when not focused
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            hintText:
+                                'Enter feedback here...', // Optional placeholder text
+                            hintStyle: const TextStyle(
+                                color: AppColors.textBlack), // Hint text color
                           ),
                           maxLines: 4,
                         ),
@@ -253,16 +289,41 @@ class _StudentGradingPageState extends State<StudentGradingPage> {
                   ],
                   decoration: InputDecoration(
                     labelText: "Grade (Max: $maxGrade)",
-                    border: const OutlineInputBorder(),
+                    labelStyle:
+                        TextStyle(color: AppColors.textBlack), // Label color
+                    border: OutlineInputBorder(
+                      borderRadius:
+                          BorderRadius.circular(10), // Rounded corners
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                          color: AppColors.appBarColor,
+                          width: 2), // Border color when focused
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                          color:
+                              AppColors.textBlack), // Border when not focused
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
                   keyboardType: TextInputType.number,
                 );
               } else {
-                gradeWidget = Text("Grade: $currentGrade/$maxGrade");
+                gradeWidget = Text(
+                  "Grade: $currentGrade/$maxGrade",
+                  style: TextStyle(
+                      color: AppColors.textBlack), // Customize text color
+                );
               }
 
               return Card(
                 margin: const EdgeInsets.all(8.0),
+                elevation: 4, // Optional: Add elevation for shadow effect
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10), // Rounded corners
+                ),
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
@@ -273,6 +334,7 @@ class _StudentGradingPageState extends State<StudentGradingPage> {
                         style: const TextStyle(
                           fontSize: 16.0,
                           fontWeight: FontWeight.bold,
+                          color: AppColors.textBlack, // Text color for question
                         ),
                       ),
                       const SizedBox(height: 8.0),
@@ -286,7 +348,10 @@ class _StudentGradingPageState extends State<StudentGradingPage> {
                               children: [
                                 Text(
                                   "Answer: $answerValue",
-                                  style: const TextStyle(fontSize: 14.0),
+                                  style: const TextStyle(
+                                      fontSize: 14.0,
+                                      color: AppColors
+                                          .textBlack), // Answer text color
                                 ),
                               ],
                             ),

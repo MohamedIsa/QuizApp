@@ -25,12 +25,9 @@ class _AddQuestionExamState extends State<AddQuestionExam> {
           .delete();
       Navigator.pop(context);
     } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Failed to cancel exam. Please try again."),
-          backgroundColor: Colors.red,
-        ),
-      );
+      SnackbarUtils.showErrorSnackbar(
+          context, 'Failed to cancel exam. Please try again.');
+
       print("Error deleting exam: $error");
     }
   }
@@ -99,9 +96,8 @@ class _AddQuestionExamState extends State<AddQuestionExam> {
                 };
               });
             } catch (e) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Error updating question: $e')),
-              );
+              SnackbarUtils.showErrorSnackbar(
+                  context, 'Error updating question: $e');
             }
           },
         );
@@ -128,9 +124,8 @@ class _AddQuestionExamState extends State<AddQuestionExam> {
 
   void _createExam() async {
     if (_questions.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Please add at least one question.")),
-      );
+      SnackbarUtils.showErrorSnackbar(
+          context, 'Please add at least one question.');
       return;
     }
 
@@ -175,16 +170,11 @@ class _AddQuestionExamState extends State<AddQuestionExam> {
           .update({
         'totalGrade': _calculateTotalGrade(),
       });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Exam created successfully!")),
-      );
+      SnackbarUtils.showSuccessSnackbar(context, 'Exam created successfully!');
 
       Navigator.pop(context);
     } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Failed to create the exam.")),
-      );
+      SnackbarUtils.showErrorSnackbar(context, 'Failed to create the exam.');
       print("Error saving exam: $error");
     }
   }

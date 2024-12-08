@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:project_444/constant.dart';
 import 'package:project_444/firebase_options.dart';
 
 class EditQuestion extends StatefulWidget {
@@ -69,9 +70,7 @@ class _EditQuestionState extends State<EditQuestion> {
         });
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to pick image')),
-      );
+      SnackbarUtils.showErrorSnackbar(context, 'Failed to pick image');
     }
   }
 
@@ -90,9 +89,8 @@ class _EditQuestionState extends State<EditQuestion> {
 
       return await snapshot.ref.getDownloadURL();
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to upload image')),
-      );
+      SnackbarUtils.showErrorSnackbar(context, 'Failed to upload image');
+
       return null;
     } finally {
       setState(() => _isUploading = false);
@@ -107,9 +105,7 @@ class _EditQuestionState extends State<EditQuestion> {
         _imageDeleted = true;
       });
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to remove image: $e')),
-      );
+      SnackbarUtils.showErrorSnackbar(context, 'Failed to remove image');
     }
   }
 

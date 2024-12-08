@@ -8,3 +8,31 @@ class AppColors {
   static const Color pageColor = Color(0xFFF9F7F7);
   static const Color txtblue = Color(0xFFDBE2EF);
 }
+
+class SnackbarUtils {
+  // Show success snackbar
+  static void showSuccessSnackbar(BuildContext context, String message) {
+    final snackBar = SnackBar(
+      content: Text(
+        message,
+        style: TextStyle(color: Colors.white), // Text color
+      ),
+      backgroundColor: AppColors.buttonColor, // Background color for success
+      duration: Duration(seconds: 3), // Duration for the snackbar
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+
+  // Show error snackbar
+  static void showErrorSnackbar(BuildContext context, String message) {
+    final snackBar = SnackBar(
+      content: Text(
+        message,
+        style: TextStyle(color: Colors.white), // Text color
+      ),
+      backgroundColor: Colors.red, // Background color for error
+      duration: Duration(seconds: 3), // Duration for the snackbar
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+}

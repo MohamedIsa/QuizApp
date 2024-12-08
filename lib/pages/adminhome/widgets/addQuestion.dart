@@ -59,9 +59,7 @@ class AddQuestionState extends State<AddQuestion> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to pick image')),
-        );
+        SnackbarUtils.showErrorSnackbar(context, 'Failed to pick image');
       }
     }
   }
@@ -92,16 +90,12 @@ class AddQuestionState extends State<AddQuestion> {
       return downloadUrl;
     } on FirebaseException catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Upload failed: ${e.message}')),
-        );
+        SnackbarUtils.showErrorSnackbar(context, 'Upload failed: ${e.message}');
       }
       return null;
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Upload failed')),
-        );
+        SnackbarUtils.showErrorSnackbar(context, 'Upload failed');
       }
       return null;
     }
@@ -124,14 +118,15 @@ class AddQuestionState extends State<AddQuestion> {
     switch (_questionType) {
       case 'Multiple Choice':
         if (_correctAnswer == null || !_validateOptions()) {
-          _showValidationError(
-              'Please fill all options and select a correct answer');
+          SnackbarUtils.showErrorSnackbar(
+              context, 'Please fill all options and select a correct answer');
           return;
         }
         break;
       case 'True/False':
         if (_correctAnswer == null) {
-          _showValidationError('Please select True or False');
+          SnackbarUtils.showErrorSnackbar(
+              context, 'Please select True or False');
           return;
         }
         break;
@@ -150,14 +145,6 @@ class AddQuestionState extends State<AddQuestion> {
     if (mounted) {
       widget.onAddQuestion(newQuestion);
       Navigator.of(context).pop();
-    }
-  }
-
-  void _showValidationError(String message) {
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(message)),
-      );
     }
   }
 
