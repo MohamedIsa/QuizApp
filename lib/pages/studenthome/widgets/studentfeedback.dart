@@ -13,12 +13,26 @@ class StudentFeedbackPage extends StatelessWidget {
   });
 
   void displayFeedback(BuildContext context, DocumentSnapshot studentSnapshot) {
+    // Extract the feedback, handling potential null or missing field
+    final feedbackData = studentSnapshot.data() as Map<String, dynamic>?;
+    final feedback = feedbackData?['feedback'] as String?;
+
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
           title: Text('Feedback Information'),
-          content: Text(studentSnapshot['feedback'] ?? 'No feedback provided.'),
+          content: Text(
+            // If feedback is null or empty, show "There is no feedback"
+            feedback == null || feedback.isEmpty
+                ? 'There is no feedback.'
+                : feedback,
+            style: TextStyle(
+              color: feedback == null || feedback.isEmpty
+                  ? Colors.grey
+                  : Colors.black,
+            ),
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
@@ -49,13 +63,20 @@ class StudentFeedbackPage extends StatelessWidget {
           IconButton(
             icon: Icon(Icons.info_outline),
             onPressed: () async {
-              var studentSnapshot = await FirebaseFirestore.instance
-                  .collection('exams')
-                  .doc(examId)
-                  .collection('studentsSubmissions')
-                  .doc(userId)
-                  .get();
-              displayFeedback(context, studentSnapshot);
+              try {
+                var studentSnapshot = await FirebaseFirestore.instance
+                    .collection('exams')
+                    .doc(examId)
+                    .collection('studentsSubmissions')
+                    .doc(userId)
+                    .get();
+                displayFeedback(context, studentSnapshot);
+              } catch (e) {
+                // Handle any potential errors
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Error fetching feedback: $e')),
+                );
+              }
             },
           ),
         ],
@@ -71,7 +92,7 @@ class StudentFeedbackPage extends StatelessWidget {
 
           // Loading state for exam data
           if (examSnapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: SizedBox.shrink());
+            return Center(child: CircularProgressIndicator());
           }
 
           // Check if exam data exists
@@ -130,6 +151,9 @@ class StudentFeedbackPage extends StatelessWidget {
                               width: 50,
                               height: 50,
                               fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Icon(Icons.image_not_supported);
+                              },
                             )
                           : null,
                       title: Text(
