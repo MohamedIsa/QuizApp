@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:project_444/constant.dart';
 import 'package:project_444/pages/adminhome/widgets/studentGradingPage.dart';
 
 class ExamAnswers extends StatefulWidget {
@@ -32,7 +33,15 @@ class _ExamAnswersState extends State<ExamAnswers> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.ExamName),
+        backgroundColor: AppColors.appBarColor,
+        iconTheme: IconThemeData(color: AppColors.buttonTextColor),
+        title: Text(
+          widget.ExamName,
+          style: TextStyle(
+            color: AppColors.buttonTextColor,
+          ),
+        ),
+        centerTitle: true,
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
@@ -83,7 +92,10 @@ class _ExamAnswersState extends State<ExamAnswers> {
                 margin: const EdgeInsets.all(8.0),
                 elevation: 4.0,
                 child: ListTile(
-                  leading: const Icon(Icons.person),
+                  leading: const Icon(
+                    Icons.person,
+                    color: AppColors.buttonColor,
+                  ),
                   title: Text(studentName),
                   subtitle: Text(studentEmail),
                   trailing: needsGrading

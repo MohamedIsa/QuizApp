@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:project_444/firebase_options.dart';
 import 'dart:io';
+import '../../../constant.dart';
 import '../../models/questions.dart';
 
 class AddQuestion extends StatefulWidget {
@@ -142,7 +143,7 @@ class AddQuestionState extends State<AddQuestion> {
       questionText: _questionText,
       options: _options,
       correctAnswer: _correctAnswer,
-      grade: _questionGrade, // grade is now an int
+      grade: _questionGrade,
       imageUrl: _imageUrl,
     );
 
@@ -163,16 +164,34 @@ class AddQuestionState extends State<AddQuestion> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Add New Question'),
+      title: Text(
+        'Add New Question',
+        style: TextStyle(color: AppColors.textBlack),
+      ),
       content: Form(
         key: _formKey,
         child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 value: _questionType.isEmpty ? null : _questionType,
-                decoration: InputDecoration(labelText: 'Question Type'),
+                decoration: InputDecoration(
+                  labelText: 'Question Type',
+                  labelStyle: TextStyle(color: AppColors.textBlack),
+                  hintText: 'Select Question Type',
+                  hintStyle: TextStyle(color: AppColors.textBlack),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: AppColors.appBarColor),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide:
+                        BorderSide(color: AppColors.appBarColor, width: 2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
                 items: [
                   'Multiple Choice',
                   'True/False',
@@ -192,7 +211,19 @@ class AddQuestionState extends State<AddQuestion> {
                   });
                 },
               ),
-              if (_imageFile != null)
+              SizedBox(height: 16),
+              if (_imageFile == null)
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.buttonColor,
+                  ),
+                  onPressed: _pickImage,
+                  child: Text(
+                    'Add Image (Optional)',
+                    style: TextStyle(color: AppColors.buttonTextColor),
+                  ),
+                )
+              else
                 Stack(
                   children: [
                     Image.file(_imageFile!,
@@ -205,22 +236,46 @@ class AddQuestionState extends State<AddQuestion> {
                       ),
                     ),
                   ],
-                )
-              else
-                ElevatedButton(
-                  onPressed: _pickImage,
-                  child: Text('Add Image (Optional)'),
                 ),
               SizedBox(height: 16),
               TextFormField(
-                decoration: InputDecoration(labelText: 'Enter Question'),
+                decoration: InputDecoration(
+                  labelText: 'Enter Question',
+                  labelStyle: TextStyle(color: AppColors.textBlack),
+                  hintText: 'Enter the question text',
+                  hintStyle: TextStyle(color: AppColors.textBlack),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: AppColors.appBarColor),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide:
+                        BorderSide(color: AppColors.appBarColor, width: 2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
                 validator: (value) => value == null || value.isEmpty
                     ? 'Question cannot be empty'
                     : null,
                 onChanged: (value) => _questionText = value,
               ),
+              SizedBox(height: 16),
               TextFormField(
-                decoration: InputDecoration(labelText: 'Question Grade'),
+                decoration: InputDecoration(
+                  labelText: 'Question Grade',
+                  labelStyle: TextStyle(color: AppColors.textBlack),
+                  hintText: 'Enter the question grade',
+                  hintStyle: TextStyle(color: AppColors.textBlack),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: AppColors.appBarColor),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide:
+                        BorderSide(color: AppColors.appBarColor, width: 2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
                 keyboardType: TextInputType.number,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 validator: (value) => value == null || value.isEmpty
@@ -228,64 +283,25 @@ class AddQuestionState extends State<AddQuestion> {
                     : null,
                 onChanged: (value) {
                   setState(() {
-                    _questionGrade =
-                        int.tryParse(value) ?? 0; // Ensure it's an integer
+                    _questionGrade = int.tryParse(value) ?? 0;
                   });
                 },
               ),
-              if (_questionType == 'Multiple Choice')
-                ...List.generate(
-                    4,
-                    (index) => Row(
-                          children: [
-                            Radio<String>(
-                              value: _options[index],
-                              groupValue: _correctAnswer,
-                              onChanged: _options[index].isNotEmpty
-                                  ? (value) =>
-                                      setState(() => _correctAnswer = value)
-                                  : null,
-                            ),
-                            Expanded(
-                              child: TextFormField(
-                                decoration: InputDecoration(
-                                  labelText: 'Option ${index + 1}',
-                                ),
-                                onChanged: (value) {
-                                  setState(() {
-                                    _options[index] = value;
-                                  });
-                                },
-                              ),
-                            ),
-                          ],
-                        )),
-              if (_questionType == 'True/False')
-                Column(
-                  children: ['True', 'False']
-                      .map((option) => RadioListTile<String>(
-                            title: Text(option),
-                            value: option,
-                            groupValue: _correctAnswer,
-                            onChanged: (value) =>
-                                setState(() => _correctAnswer = value),
-                          ))
-                      .toList(),
+              SizedBox(height: 16),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.buttonColor,
                 ),
+                onPressed: _submitQuestion,
+                child: Text(
+                  'Save Question',
+                  style: TextStyle(color: AppColors.buttonTextColor),
+                ),
+              ),
             ],
           ),
         ),
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: Text('Cancel'),
-        ),
-        ElevatedButton(
-          onPressed: _submitQuestion,
-          child: Text('Add Question'),
-        ),
-      ],
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
+import 'package:project_444/constant.dart';
 import 'question_edit_dialog.dart';
 
 class EditExamQuestions extends StatefulWidget {
@@ -100,7 +101,15 @@ class _EditExamQuestionsState extends State<EditExamQuestions> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Edit Exam Questions')),
+      appBar: AppBar(
+        backgroundColor: AppColors.appBarColor,
+        iconTheme: IconThemeData(color: AppColors.buttonTextColor),
+        title: Text(
+          'Edit Exam Questions',
+          style: TextStyle(color: AppColors.buttonTextColor),
+        ),
+        centerTitle: true,
+      ),
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
           : ListView.builder(
@@ -119,14 +128,14 @@ class _EditExamQuestionsState extends State<EditExamQuestions> {
                             children: [
                               TextSpan(
                                 text: 'Type: ${_questions[index]['type']}',
-                                style: TextStyle(color: Colors.blue),
+                                style: TextStyle(color: AppColors.textBlack),
                               ),
                               if (_questions[index]['type'] ==
                                   'Multiple Choice')
                                 TextSpan(
                                   text:
                                       '\nOptions: ${_questions[index]['options'].join(', ')}',
-                                  style: TextStyle(color: Colors.blue),
+                                  style: TextStyle(color: AppColors.textBlack),
                                 ),
                               if (_questions[index]['type'] == 'True/False' ||
                                   _questions[index]['type'] ==
@@ -134,12 +143,12 @@ class _EditExamQuestionsState extends State<EditExamQuestions> {
                                 TextSpan(
                                   text:
                                       '\nCorrect Answer: ${_questions[index]['correctAnswer']}',
-                                  style: TextStyle(color: Colors.blue),
+                                  style: TextStyle(color: AppColors.textBlack),
                                 ),
                               TextSpan(
                                 text:
                                     '\nGrade: ${_questions[index]['Questiongrade']}',
-                                style: TextStyle(color: Colors.blue),
+                                style: TextStyle(color: AppColors.textBlack),
                               ),
                             ],
                           ),
@@ -161,7 +170,7 @@ class _EditExamQuestionsState extends State<EditExamQuestions> {
                       children: [
                         IconButton(
                           onPressed: () => _editQuestion(_questions[index]),
-                          icon: Icon(Icons.edit, color: Colors.orange),
+                          icon: Icon(Icons.edit, color: AppColors.buttonColor),
                         ),
                         IconButton(
                           onPressed: () => _removeQuestion(index),
@@ -174,8 +183,12 @@ class _EditExamQuestionsState extends State<EditExamQuestions> {
               },
             ),
       floatingActionButton: FloatingActionButton(
+        backgroundColor: AppColors.appBarColor,
         onPressed: () => _editQuestion(null),
-        child: Icon(Icons.add),
+        child: Icon(
+          Icons.add,
+          color: AppColors.buttonTextColor,
+        ),
       ),
     );
   }
