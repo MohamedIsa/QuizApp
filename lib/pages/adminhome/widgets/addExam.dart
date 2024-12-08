@@ -57,31 +57,24 @@ class _AddExamWidgetState extends State<AddExamWidget> {
     }
   }
 
-  void _showSnackBar(String message, Color color) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: color,
-        duration: const Duration(seconds: 2),
-      ),
-    );
-  }
-
   void _saveExam() async {
     if (_formKey.currentState!.validate()) {
       if (_startDate == null || _endDate == null) {
-        _showSnackBar('Please select both start and end dates.', Colors.red);
+        SnackbarUtils.showErrorSnackbar(
+            context, 'Please select both start and end dates.');
         return;
       }
 
       if (_endDate!.isBefore(_startDate!)) {
-        _showSnackBar('End date cannot be before the start date.', Colors.red);
+        SnackbarUtils.showErrorSnackbar(
+            context, 'End date cannot be before the start date.');
         return;
       }
 
       int? duration = int.tryParse(_durationController.text);
       if (duration == null) {
-        _showSnackBar('Please enter a valid duration in minutes.', Colors.red);
+        SnackbarUtils.showErrorSnackbar(
+            context, 'Please enter a valid duration in minutes.');
         return;
       }
 
@@ -89,9 +82,8 @@ class _AddExamWidgetState extends State<AddExamWidget> {
       int availableMinutes = timeDifference.inMinutes;
 
       if (duration > availableMinutes) {
-        _showSnackBar(
-            'Duration cannot be longer than the time between start and end dates.',
-            Colors.red);
+        SnackbarUtils.showErrorSnackbar(context,
+            'Duration cannot be longer than the time between start and end dates.');
         return;
       }
 
@@ -115,7 +107,8 @@ class _AddExamWidgetState extends State<AddExamWidget> {
 
         _clearForm();
       } catch (e) {
-        _showSnackBar('Failed to save the exam. Try again.', Colors.red);
+        SnackbarUtils.showErrorSnackbar(
+            context, 'Failed to save the exam. Try again.');
       }
     }
   }

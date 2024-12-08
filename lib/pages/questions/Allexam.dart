@@ -88,7 +88,6 @@ class _AllExamState extends State<AllExam> {
         }
       }
 
-
       List<Map<String, dynamic>> answersList = studentAnswers.map((answer) {
         return {
           'Qid': answer.Qid,
@@ -136,16 +135,13 @@ class _AllExamState extends State<AllExam> {
       });
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Exam submitted successfully!")),
-        );
+        SnackbarUtils.showSuccessSnackbar(
+            context, 'Exam submitted successfully!');
         Navigator.pop(context);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Error: $e")),
-        );
+        SnackbarUtils.showErrorSnackbar(context, 'Error: $e');
       }
     }
   }
