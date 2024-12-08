@@ -5,11 +5,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:project_444/pages/adminhome/widgets/tabbar.dart';
 import 'package:project_444/pages/login/user_data.dart';
 
-class Adminhome extends StatelessWidget {
+class Adminhome extends StatefulWidget {
   const Adminhome({super.key});
 
-  //===================================================================
-  // Fetch the user name from Firestore
+  @override
+  State<Adminhome> createState() => _AdminhomeState();
+}
+
+class _AdminhomeState extends State<Adminhome> {
   //===================================================================
   Future<String> fetchUserName() async {
     try {
@@ -32,8 +35,6 @@ class Adminhome extends StatelessWidget {
   }
 
   //===================================================================
-  // Logout function
-  //===================================================================
   Future<void> signOut() async {
     try {
       final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -43,8 +44,6 @@ class Adminhome extends StatelessWidget {
     }
   }
 
-  //===================================================================
-  // Build function to structure the admin home page
   //===================================================================
   @override
   Widget build(BuildContext context) {
@@ -99,20 +98,6 @@ class Adminhome extends StatelessWidget {
               },
             ),
             ListTile(
-              leading: Icon(Icons.add),
-              title: Text('Create Exam'),
-              onTap: () {
-                Navigator.pushNamed(context, '/createExam');
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.settings),
-              title: Text('Settings'),
-              onTap: () {
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
               leading: Icon(Icons.logout),
               title: Text('Logout'),
               onTap: () async {
@@ -153,13 +138,27 @@ class Adminhome extends StatelessWidget {
                   ),
                   Row(
                     children: [
-                      IconButton(
-                        icon: Badge.count(
-                          count: 99,
-                          child: Icon(Icons.notifications),
-                        ),
-                        onPressed: () {},
-                      ),
+                      StreamBuilder<int>(
+                        stream: _countNegativeGradeStudentsStream(),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return Icon(Icons.notifications);
+                          } else if (snapshot.hasError) {
+                            return Icon(Icons.notifications);
+                          } else {
+                            final count = snapshot.data ?? 0;
+                            if (count > 0) {
+                              return Badge.count(
+                                count: count,
+                                child: Icon(Icons.notifications),
+                              );
+                            } else {
+                              return Icon(Icons.notifications);
+                            }
+                          }
+                        },
+                      )
                     ],
                   ),
                 ],
@@ -189,4 +188,25 @@ class Adminhome extends StatelessWidget {
       ),
     );
   }
+}
+
+Stream<int> _countNegativeGradeStudentsStream() {
+  return FirebaseFirestore.instance
+      .collection('exams')
+      .snapshots()
+      .asyncMap((_) async {
+    int count = 0;
+    final examsSnapshot =
+        await FirebaseFirestore.instance.collection('exams').get();
+    for (var exam in examsSnapshot.docs) {
+      final submissionsSnapshot =
+          await exam.reference.collection('studentsSubmissions').get();
+      for (var submission in submissionsSnapshot.docs) {
+        if (submission.data()['totalGrade'] < 0) {
+          count++;
+        }
+      }
+    }
+    return count;
+  });
 }

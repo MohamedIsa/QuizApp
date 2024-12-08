@@ -17,11 +17,13 @@ class Studenthome extends StatefulWidget {
 class _StudenthomeState extends State<Studenthome>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  final String userId = FirebaseAuth.instance.currentUser?.uid ?? '';
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    // userId is already initialized as a final variable
   }
 
   @override
@@ -90,35 +92,11 @@ class _StudenthomeState extends State<Studenthome>
                 ),
               ),
             ),
-
-            // DrawerHeader(
-            //   decoration: BoxDecoration(
-            //     color: Colors.blue,
-            //   ),
-            //   child: Text(
-            //     'Menu',
-            //     style: TextStyle(
-            //       color: Colors.white,
-            //       fontSize: 24,
-            //     ),
-            //   ),
-            // ),
             ListTile(
               leading: Icon(Icons.home),
               iconColor: AppColors.buttonColor,
               title: Text(
                 'Home',
-                style: TextStyle(color: AppColors.textBlack),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.settings),
-              iconColor: AppColors.buttonColor,
-              title: Text(
-                'Settings',
                 style: TextStyle(color: AppColors.textBlack),
               ),
               onTap: () {
@@ -174,7 +152,10 @@ class _StudenthomeState extends State<Studenthome>
         controller: _tabController,
         children: [
           Center(child: StudentExam()),
-          Center(child: GradeView()),
+          Center(
+              child: GradeView(
+            userId: userId,
+          )),
         ],
       ),
     );

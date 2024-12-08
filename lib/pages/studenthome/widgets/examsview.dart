@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:project_444/constant.dart';
@@ -121,9 +122,7 @@ class _StudentExamState extends State<StudentExam> {
       if (difference > 0) {
         final timer = Timer(Duration(seconds: difference), () {
           if (mounted) {
-            setState(() {
-              // Update the state if required.
-            });
+            setState(() {});
           }
         });
         _timers.add(timer);
@@ -144,12 +143,14 @@ class _StudentExamState extends State<StudentExam> {
     // Check if the exam is active (within the start and end time)
     if (now.isAfter(startDate) && now.isBefore(endDate)) {
       try {
-        // Get the student's attempts from Firestore
+        FirebaseAuth auth = FirebaseAuth.instance;
+        final user = auth.currentUser;
+        final userId = user!.uid;
         final submissionSnapshot = await FirebaseFirestore.instance
             .collection('exams')
             .doc(examId)
             .collection('studentsSubmissions')
-            .doc('studentId') // Replace with actual student ID logic
+            .doc(userId)
             .get();
 
         // Get the number of attempts made

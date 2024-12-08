@@ -20,8 +20,7 @@ class _StudentGradingPageState extends State<StudentGradingPage> {
   late Future<List<Map<String, dynamic>>> questionsAndAnswersFuture;
   final Map<String, TextEditingController> gradingControllers = {};
   final Map<String, int> maxGrades = {};
-  final TextEditingController feedbackController =
-      TextEditingController(); // Controller for feedback
+  final TextEditingController feedbackController = TextEditingController();
 
   @override
   void initState() {
@@ -29,10 +28,8 @@ class _StudentGradingPageState extends State<StudentGradingPage> {
     questionsAndAnswersFuture = fetchQuestionsAndAnswers();
   }
 
-  // Fetch questions and student's answers from Firestore
   Future<List<Map<String, dynamic>>> fetchQuestionsAndAnswers() async {
     try {
-      // Get questions from the exam
       DocumentSnapshot examSnapshot = await FirebaseFirestore.instance
           .collection('exams')
           .doc(widget.Eid)
@@ -41,7 +38,6 @@ class _StudentGradingPageState extends State<StudentGradingPage> {
       final questions = (examSnapshot.data()
           as Map<String, dynamic>)['questions'] as List<dynamic>;
 
-      // Get the student's answers
       DocumentSnapshot studentSnapshot = await FirebaseFirestore.instance
           .collection('exams')
           .doc(widget.Eid)
@@ -52,7 +48,6 @@ class _StudentGradingPageState extends State<StudentGradingPage> {
       final answers = (studentSnapshot.data()
           as Map<String, dynamic>)['answers'] as List<dynamic>;
 
-      // Combine questions and answers
       return questions.map((question) {
         final answer = answers.firstWhere(
           (ans) => ans['Qid'] == question['questionId'],
@@ -70,17 +65,58 @@ class _StudentGradingPageState extends State<StudentGradingPage> {
     }
   }
 
-  // Save updated grades, feedback, and feedback to Firestore
   Future<void> saveGradesAndFeedback() async {
     try {
-      final updates = gradingControllers.entries.map((entry) {
+      final submissionDoc = await FirebaseFirestore.instance
+          .collection('exams')
+          .doc(widget.Eid)
+          .collection('studentsSubmissions')
+          .doc(widget.Sid)
+          .get();
+
+      if (!submissionDoc.exists) {
+        throw Exception('Submission not found');
+      }
+
+      final currentAnswers = List<Map<String, dynamic>>.from(
+          submissionDoc.data()?['answers'] ?? []);
+
+      final examDoc = await FirebaseFirestore.instance
+          .collection('exams')
+          .doc(widget.Eid)
+          .get();
+
+      final questions =
+          List<Map<String, dynamic>>.from(examDoc.data()?['questions'] ?? []);
+
+      final questionTypes = {
+        for (var q in questions) q['questionId'] as String: q['type'] as String
+      };
+
+      int totalGrade = 0;
+      final updates = currentAnswers.map((answer) {
+        final qid = answer['Qid'] as String;
+        final questionType = questionTypes[qid];
+
+        int grade;
+
+        if (questionType == 'Multiple Choice' || questionType == 'True/False') {
+          grade = answer['grade'];
+        } else {
+          grade = gradingControllers.containsKey(qid)
+              ? int.tryParse(gradingControllers[qid]!.text) ?? answer['grade']
+              : answer['grade'];
+        }
+
+        totalGrade += grade;
+
         return {
-          'Qid': entry.key,
-          'grade': int.parse(entry.value.text),
+          'Qid': qid,
+          'AnswerValue': answer['AnswerValue'],
+          'grade': grade,
         };
       }).toList();
 
-      // Update Firestore with the new grades and feedback
       await FirebaseFirestore.instance
           .collection('exams')
           .doc(widget.Eid)
@@ -88,35 +124,40 @@ class _StudentGradingPageState extends State<StudentGradingPage> {
           .doc(widget.Sid)
           .update({
         'answers': updates,
-        'feedback': feedbackController.text, // Save feedback
+        'feedback': feedbackController.text,
+        'totalGrade': totalGrade,
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text("Grades and feedback saved successfully!")),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text("Grades and feedback saved successfully!")),
+        );
+      }
     } catch (e) {
       print("Error saving grades and feedback: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Error saving grades and feedback: $e")));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error saving grades and feedback: $e")),
+        );
+      }
     }
   }
 
-  // Custom input formatter to restrict grades
   TextInputFormatter gradeInputFormatter(int maxGrade) {
     return TextInputFormatter.withFunction((oldValue, newValue) {
       final newText = newValue.text;
 
       if (newText.isEmpty) {
-        return newValue; // Allow clearing the field
+        return newValue;
       }
 
       final parsed = int.tryParse(newText);
       if (parsed == null || parsed < 0 || parsed > maxGrade) {
-        return oldValue; // Reject invalid input
+        return oldValue;
       }
 
-      return newValue; // Accept valid input
+      return newValue;
     });
   }
 
@@ -128,8 +169,7 @@ class _StudentGradingPageState extends State<StudentGradingPage> {
         actions: [
           IconButton(
             icon: const Icon(Icons.save),
-            onPressed:
-                saveGradesAndFeedback, // Save grades and feedback when admin taps save
+            onPressed: saveGradesAndFeedback,
           ),
         ],
       ),
@@ -155,11 +195,9 @@ class _StudentGradingPageState extends State<StudentGradingPage> {
           }
 
           return ListView.builder(
-            itemCount:
-                questionsAndAnswers.length + 1, // Add 1 for feedback section
+            itemCount: questionsAndAnswers.length + 1,
             itemBuilder: (context, index) {
               if (index == questionsAndAnswers.length) {
-                // Feedback Section at the end
                 return Card(
                   margin: const EdgeInsets.all(8.0),
                   child: Padding(
@@ -179,7 +217,7 @@ class _StudentGradingPageState extends State<StudentGradingPage> {
                             labelText: "Admin's Feedback",
                             border: OutlineInputBorder(),
                           ),
-                          maxLines: 4, // Multi-line input for feedback
+                          maxLines: 4,
                         ),
                       ],
                     ),
@@ -197,13 +235,11 @@ class _StudentGradingPageState extends State<StudentGradingPage> {
               final answerValue =
                   answer?['AnswerValue'] ?? 'No answer provided';
               final currentGrade = answer?['grade'] ?? -1;
-              final imageUrl =
-                  question['imageUrl']; // Assuming this field exists
+              final imageUrl = question['imageUrl'];
 
               Widget gradeWidget;
 
               if (questionType == 'Short Answer' || questionType == 'Essay') {
-                // Admin grading for Short Answer and Essay
                 final controller = TextEditingController(
                   text: currentGrade == -1 ? '' : currentGrade.toString(),
                 );
@@ -213,7 +249,7 @@ class _StudentGradingPageState extends State<StudentGradingPage> {
                 gradeWidget = TextField(
                   controller: controller,
                   inputFormatters: [
-                    gradeInputFormatter(maxGrade), // Restrict input
+                    gradeInputFormatter(maxGrade),
                   ],
                   decoration: InputDecoration(
                     labelText: "Grade (Max: $maxGrade)",
@@ -222,7 +258,6 @@ class _StudentGradingPageState extends State<StudentGradingPage> {
                   keyboardType: TextInputType.number,
                 );
               } else {
-                // Display immutable grades for T/F and MSQ
                 gradeWidget = Text("Grade: $currentGrade/$maxGrade");
               }
 
@@ -233,7 +268,6 @@ class _StudentGradingPageState extends State<StudentGradingPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Display question text
                       Text(
                         "Q: $questionText",
                         style: const TextStyle(
@@ -242,13 +276,11 @@ class _StudentGradingPageState extends State<StudentGradingPage> {
                         ),
                       ),
                       const SizedBox(height: 8.0),
-                      // Display image if exists
                       if (imageUrl != null && imageUrl.isNotEmpty)
                         Column(
                           children: [
                             Image.network(imageUrl),
                             const SizedBox(height: 8.0),
-                            // Display answer under image, aligned to the left
                             Row(
                               mainAxisAlignment: MainAxisAlignment.start,
                               children: [
@@ -261,7 +293,6 @@ class _StudentGradingPageState extends State<StudentGradingPage> {
                           ],
                         ),
                       const SizedBox(height: 16.0),
-                      // Display grade widget
                       gradeWidget,
                     ],
                   ),
