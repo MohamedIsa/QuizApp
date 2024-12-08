@@ -143,7 +143,7 @@ class AddQuestionState extends State<AddQuestion> {
       questionText: _questionText,
       options: _options,
       correctAnswer: _correctAnswer,
-      grade: _questionGrade,
+      grade: _questionGrade, // grade is now an int
       imageUrl: _imageUrl,
     );
 
@@ -174,21 +174,24 @@ class AddQuestionState extends State<AddQuestion> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 value: _questionType.isEmpty ? null : _questionType,
                 decoration: InputDecoration(
                   labelText: 'Question Type',
                   labelStyle: TextStyle(color: AppColors.textBlack),
                   hintText: 'Select Question Type',
-                  hintStyle: TextStyle(color: AppColors.textBlack),
+                  hintStyle:
+                      TextStyle(color: AppColors.textBlack), // Hint text style
                   enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: AppColors.appBarColor),
+                    borderSide: BorderSide(
+                        color:
+                            AppColors.appBarColor), // Border when not focused
                     borderRadius: BorderRadius.circular(8),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderSide:
-                        BorderSide(color: AppColors.appBarColor, width: 2),
+                    borderSide: BorderSide(
+                        color: AppColors.appBarColor,
+                        width: 2), // Border when focused
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
@@ -212,18 +215,7 @@ class AddQuestionState extends State<AddQuestion> {
                 },
               ),
               SizedBox(height: 16),
-              if (_imageFile == null)
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.buttonColor,
-                  ),
-                  onPressed: _pickImage,
-                  child: Text(
-                    'Add Image (Optional)',
-                    style: TextStyle(color: AppColors.buttonTextColor),
-                  ),
-                )
-              else
+              if (_imageFile != null)
                 Stack(
                   children: [
                     Image.file(_imageFile!,
@@ -236,21 +228,38 @@ class AddQuestionState extends State<AddQuestion> {
                       ),
                     ),
                   ],
+                )
+              else
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.buttonColor, // Button color
+                  ),
+                  onPressed: _pickImage,
+                  child: Text(
+                    'Add Image (Optional)',
+                    style: TextStyle(
+                        color: AppColors.buttonTextColor), // Button text color
+                  ),
                 ),
               SizedBox(height: 16),
               TextFormField(
                 decoration: InputDecoration(
                   labelText: 'Enter Question',
-                  labelStyle: TextStyle(color: AppColors.textBlack),
+                  labelStyle:
+                      TextStyle(color: AppColors.textBlack), // Label color
                   hintText: 'Enter the question text',
-                  hintStyle: TextStyle(color: AppColors.textBlack),
+                  hintStyle:
+                      TextStyle(color: AppColors.textBlack), // Hint text style
                   enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: AppColors.appBarColor),
+                    borderSide: BorderSide(
+                        color:
+                            AppColors.appBarColor), // Border when not focused
                     borderRadius: BorderRadius.circular(8),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderSide:
-                        BorderSide(color: AppColors.appBarColor, width: 2),
+                    borderSide: BorderSide(
+                        color: AppColors.appBarColor,
+                        width: 2), // Border when focused
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
@@ -263,16 +272,21 @@ class AddQuestionState extends State<AddQuestion> {
               TextFormField(
                 decoration: InputDecoration(
                   labelText: 'Question Grade',
-                  labelStyle: TextStyle(color: AppColors.textBlack),
+                  labelStyle:
+                      TextStyle(color: AppColors.textBlack), // Label color
                   hintText: 'Enter the question grade',
-                  hintStyle: TextStyle(color: AppColors.textBlack),
+                  hintStyle:
+                      TextStyle(color: AppColors.textBlack), // Hint text style
                   enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: AppColors.appBarColor),
+                    borderSide: BorderSide(
+                        color:
+                            AppColors.appBarColor), // Border when not focused
                     borderRadius: BorderRadius.circular(8),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderSide:
-                        BorderSide(color: AppColors.appBarColor, width: 2),
+                    borderSide: BorderSide(
+                        color: AppColors.appBarColor,
+                        width: 2), // Border when focused
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
@@ -283,25 +297,93 @@ class AddQuestionState extends State<AddQuestion> {
                     : null,
                 onChanged: (value) {
                   setState(() {
-                    _questionGrade = int.tryParse(value) ?? 0;
+                    _questionGrade =
+                        int.tryParse(value) ?? 0; // Ensure it's an integer
                   });
                 },
               ),
-              SizedBox(height: 16),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.buttonColor,
+              if (_questionType == 'Multiple Choice')
+                ...List.generate(
+                  4,
+                  (index) => Container(
+                    decoration: BoxDecoration(
+                        border: Border.all(color: AppColors.appBarColor),
+                        borderRadius: BorderRadius.circular(8)),
+                    margin: EdgeInsets.only(top: 16),
+                    padding: EdgeInsets.all(4),
+                    child: Row(
+                      children: [
+                        Radio<String>(
+                          value: _options[index],
+                          groupValue: _correctAnswer,
+                          onChanged: _options[index].isNotEmpty
+                              ? (value) =>
+                                  setState(() => _correctAnswer = value)
+                              : null,
+                        ),
+                        Expanded(
+                          child: TextFormField(
+                            decoration: InputDecoration(
+                              labelText: 'Option ${index + 1}',
+                              labelStyle: TextStyle(
+                                  color: AppColors.textBlack), // Label color
+                              hintStyle: TextStyle(
+                                  color:
+                                      AppColors.textBlack), // Hint text style
+                            ),
+                            onChanged: (value) {
+                              setState(() {
+                                _options[index] = value;
+                              });
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-                onPressed: _submitQuestion,
-                child: Text(
-                  'Save Question',
-                  style: TextStyle(color: AppColors.buttonTextColor),
+              if (_questionType == 'True/False')
+                Column(
+                  children: ['True', 'False']
+                      .map((option) => Container(
+                            decoration: BoxDecoration(
+                                border:
+                                    Border.all(color: AppColors.appBarColor),
+                                borderRadius: BorderRadius.circular(8)),
+                            margin: EdgeInsets.only(top: 16, left: 8, right: 8),
+                            child: RadioListTile<String>(
+                              title: Text(option),
+                              value: option,
+                              groupValue: _correctAnswer,
+                              onChanged: (value) =>
+                                  setState(() => _correctAnswer = value),
+                            ),
+                          ))
+                      .toList(),
                 ),
-              ),
             ],
           ),
         ),
       ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(
+            'Cancel',
+            style: TextStyle(color: AppColors.textBlack),
+          ),
+        ),
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.buttonColor,
+          ),
+          onPressed: _submitQuestion,
+          child: Text(
+            'Add Question',
+            style: TextStyle(color: AppColors.buttonTextColor),
+          ),
+        )
+      ],
     );
   }
 }
