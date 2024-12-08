@@ -1,5 +1,9 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:project_444/firebase_options.dart';
 
 class EditQuestion extends StatefulWidget {
   final String initialType;
@@ -8,16 +12,19 @@ class EditQuestion extends StatefulWidget {
   final String? initialCorrectAnswer;
   final String initialGrade;
   final String? imageUrl;
-  final Function(String, String, List<String>, String?, String) onEditQuestion;
+  final Function(String, String, List<String>, String?, String, String?)
+      onEditQuestion;
 
-  EditQuestion(
-      {required this.initialType,
-      required this.initialQuestion,
-      required this.initialOptions,
-      required this.initialCorrectAnswer,
-      required this.initialGrade,
-      required this.onEditQuestion,
-      required this.imageUrl});
+  const EditQuestion({
+    super.key,
+    required this.initialType,
+    required this.initialQuestion,
+    required this.initialOptions,
+    required this.initialCorrectAnswer,
+    required this.initialGrade,
+    required this.onEditQuestion,
+    this.imageUrl,
+  });
 
   @override
   _EditQuestionState createState() => _EditQuestionState();
@@ -29,12 +36,15 @@ class _EditQuestionState extends State<EditQuestion> {
   late String questionGrade;
   late List<String> options;
   String? correctAnswer;
-  late String? imageUrl;
+  String? imageUrl;
+  File? _imageFile;
+  bool _isUploading = false;
+  bool _imageDeleted = false;
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
     super.initState();
-    // Initialize fields with existing data
     questionType = widget.initialType;
     question = widget.initialQuestion;
     questionGrade = widget.initialGrade;
@@ -43,76 +53,175 @@ class _EditQuestionState extends State<EditQuestion> {
     imageUrl = widget.imageUrl;
   }
 
-  // Helper method to check for duplicate options
+  Future<void> _pickImage() async {
+    try {
+      final XFile? pickedFile = await _picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1800,
+        maxHeight: 1800,
+      );
+
+      if (pickedFile != null) {
+        setState(() {
+          _imageFile = File(pickedFile.path);
+          imageUrl = null;
+          _imageDeleted = false;
+        });
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to pick image')),
+      );
+    }
+  }
+
+  Future<String?> _uploadImage() async {
+    if (_imageFile == null) return _imageDeleted ? null : imageUrl;
+
+    setState(() => _isUploading = true);
+    try {
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final path =
+          'question_images/image_$timestamp.${_imageFile!.path.split('.').last}';
+
+      final ref = FirebaseStorage.instance.refFromURL(Bucket.ID).child(path);
+      final uploadTask = ref.putFile(_imageFile!);
+      final snapshot = await uploadTask;
+
+      return await snapshot.ref.getDownloadURL();
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to upload image')),
+      );
+      return null;
+    } finally {
+      setState(() => _isUploading = false);
+    }
+  }
+
+  Future<void> _removeImage() async {
+    try {
+      setState(() {
+        _imageFile = null;
+        imageUrl = null;
+        _imageDeleted = true;
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to remove image: $e')),
+      );
+    }
+  }
+
   bool _isDuplicateOption(String currentOption, int currentIndex) {
     if (currentOption.trim().isEmpty) return false;
-    return options.where((option) => option == currentOption).toList().length >
-        1;
+    return options.where((option) => option == currentOption).length > 1;
   }
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text('Edit Question'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Dropdown to select the question type
-          DropdownButton<String>(
-            value: questionType,
-            hint: Text('Select Question Type'),
-            onChanged: (value) {
-              setState(() {
-                questionType = value!;
-                correctAnswer = null;
-                if (questionType == 'Multiple Choice') {
-                  options = ['', '', '', ''];
-                }
-              });
-            },
-            items: ['Multiple Choice', 'True/False', 'Short Answer', 'Essay']
-                .map((type) {
-              return DropdownMenuItem<String>(
-                value: type,
-                child: Text(type),
-              );
-            }).toList(),
-          ),
-          // TextField for the question
-          TextFormField(
-            initialValue: question,
-            decoration: InputDecoration(labelText: 'Enter Question'),
-            onChanged: (value) {
-              setState(() {
-                question = value;
-              });
-            },
-          ),
-          TextFormField(
-            initialValue: questionGrade,
-            decoration: InputDecoration(labelText: "Enter Question Grade"),
-            keyboardType: TextInputType.number,
-            onChanged: (value) {
-              questionGrade = value;
-            },
-            inputFormatters: [
-              FilteringTextInputFormatter.digitsOnly,
-            ],
-          ),
-          // Options for multiple-choice or true/false
-          if (questionType == 'Multiple Choice') ...[
-            Column(
-              children: List.generate(4, (index) {
-                return Row(
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            DropdownButton<String>(
+              value: questionType,
+              isExpanded: true,
+              hint: Text('Select Question Type'),
+              onChanged: (value) {
+                setState(() {
+                  questionType = value!;
+                  correctAnswer = null;
+                  if (questionType == 'Multiple Choice') {
+                    options = List.filled(4, '');
+                  }
+                });
+              },
+              items: ['Multiple Choice', 'True/False', 'Short Answer', 'Essay']
+                  .map((type) =>
+                      DropdownMenuItem(value: type, child: Text(type)))
+                  .toList(),
+            ),
+
+            // Image Section
+            if (_imageFile != null)
+              Stack(
+                children: [
+                  Image.file(_imageFile!,
+                      height: 100, width: 100, fit: BoxFit.cover),
+                  Positioned(
+                    right: 0,
+                    child: IconButton(
+                      icon: Icon(Icons.close, color: Colors.red),
+                      onPressed: _removeImage,
+                    ),
+                  ),
+                ],
+              )
+            else if (imageUrl != null && !_imageDeleted)
+              Stack(
+                children: [
+                  Image.network(
+                    imageUrl!,
+                    height: 100,
+                    width: 100,
+                    fit: BoxFit.cover,
+                    loadingBuilder: (context, child, progress) {
+                      if (progress == null) return child;
+                      return Center(child: CircularProgressIndicator());
+                    },
+                    errorBuilder: (context, error, stackTrace) {
+                      return Icon(Icons.error, color: Colors.red);
+                    },
+                  ),
+                  Positioned(
+                    right: 0,
+                    top: 0,
+                    child: IconButton(
+                      icon: Icon(Icons.close, color: Colors.red),
+                      onPressed: _removeImage,
+                    ),
+                  ),
+                ],
+              ),
+
+            // Image Controls
+            if (_imageFile == null && imageUrl == null)
+              ElevatedButton(
+                onPressed: _pickImage,
+                child: Text('Add Image (Optional)'),
+              ),
+
+            SizedBox(height: 16),
+
+            TextFormField(
+              initialValue: question,
+              decoration: InputDecoration(labelText: 'Question Text'),
+              onChanged: (value) => setState(() => question = value),
+            ),
+
+            TextFormField(
+              initialValue: questionGrade,
+              decoration: InputDecoration(labelText: 'Grade'),
+              keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              onChanged: (value) => setState(() => questionGrade = value),
+            ),
+
+            if (questionType == 'Multiple Choice') ...[
+              SizedBox(height: 16),
+              ...List.generate(
+                4,
+                (index) => Row(
                   children: [
                     Radio<String>(
                       value: options[index],
                       groupValue: correctAnswer,
-                      onChanged: (value) {
-                        setState(() {
-                          correctAnswer = value;
-                        });
-                      },
+                      onChanged: options[index].isNotEmpty
+                          ? (value) => setState(() => correctAnswer = value)
+                          : null,
                     ),
                     Expanded(
                       child: TextFormField(
@@ -120,76 +229,74 @@ class _EditQuestionState extends State<EditQuestion> {
                         decoration: InputDecoration(
                           labelText: 'Option ${index + 1}',
                           errorText: _isDuplicateOption(options[index], index)
-                              ? 'Options must be unique'
+                              ? 'Duplicate option'
                               : null,
                         ),
-                        onChanged: (value) {
-                          setState(() {
-                            options[index] = value;
-                          });
-                        },
+                        onChanged: (value) =>
+                            setState(() => options[index] = value),
                       ),
                     ),
                   ],
-                );
-              }),
-            ),
+                ),
+              ),
+            ],
+
+            if (questionType == 'True/False') ...[
+              SizedBox(height: 16),
+              ...['True', 'False'].map((option) => RadioListTile<String>(
+                    title: Text(option),
+                    value: option,
+                    groupValue: correctAnswer,
+                    onChanged: (value) => setState(() => correctAnswer = value),
+                  )),
+            ],
           ],
-          // True/False options
-          if (questionType == 'True/False') ...[
-            Column(
-              children: ['True', 'False'].map((option) {
-                return RadioListTile<String>(
-                  title: Text(option),
-                  value: option,
-                  groupValue: correctAnswer,
-                  onChanged: (value) {
-                    setState(() {
-                      correctAnswer = value;
-                    });
-                  },
-                );
-              }).toList(),
-            ),
-          ],
-        ],
+        ),
       ),
       actions: [
         TextButton(
-          onPressed: () {
-            Navigator.pop(context); // Close the dialog
-          },
+          onPressed: () => Navigator.pop(context),
           child: Text('Cancel'),
         ),
-        TextButton(
-          onPressed: () {
-            bool hasDuplicates = options
-                    .where((option) => option.trim().isNotEmpty)
-                    .toSet()
-                    .length <
-                options.where((option) => option.trim().isNotEmpty).length;
+        if (_isUploading)
+          CircularProgressIndicator()
+        else
+          TextButton(
+            onPressed: () async {
+              if (question.isEmpty || questionGrade.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Please fill all required fields')),
+                );
+                return;
+              }
 
-            if (question.isNotEmpty &&
-                questionType.isNotEmpty &&
-                questionGrade.isNotEmpty &&
-                (questionType == 'Short Answer' ||
-                    questionType == 'Essay' ||
-                    (correctAnswer != null && !hasDuplicates))) {
-              widget.onEditQuestion(questionType, question, options,
-                  correctAnswer, questionGrade);
-              Navigator.pop(context);
-            } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(hasDuplicates
-                      ? 'Options must be unique'
-                      : 'Please fill in all fields and select the correct answer.'),
-                ),
+              if ((questionType == 'Multiple Choice' ||
+                      questionType == 'True/False') &&
+                  correctAnswer == null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Please select correct answer')),
+                );
+                return;
+              }
+
+              String? finalImageUrl;
+              if (!_imageDeleted) {
+                finalImageUrl =
+                    _imageFile != null ? await _uploadImage() : imageUrl;
+              }
+
+              widget.onEditQuestion(
+                questionType,
+                question,
+                options,
+                correctAnswer,
+                questionGrade,
+                finalImageUrl,
               );
-            }
-          },
-          child: Text('Save Changes'),
-        ),
+              Navigator.pop(context);
+            },
+            child: Text('Save'),
+          ),
       ],
     );
   }

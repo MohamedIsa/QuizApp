@@ -8,8 +8,10 @@ import '../../models/questions.dart';
 
 class AddQuestion extends StatefulWidget {
   final Function(Question) onAddQuestion;
+  final Question? initialQuestion;
 
-  const AddQuestion({super.key, required this.onAddQuestion});
+  const AddQuestion(
+      {super.key, required this.onAddQuestion, this.initialQuestion});
 
   @override
   AddQuestionState createState() => AddQuestionState();
@@ -19,13 +21,27 @@ class AddQuestionState extends State<AddQuestion> {
   final _formKey = GlobalKey<FormState>();
   String _questionType = '';
   String _questionText = '';
-  int _questionGrade = 0; // Ensure this is an int
+  int _questionGrade = 0;
   List<String> _options = ['', '', '', ''];
   String? _correctAnswer;
   File? _imageFile;
   String? _imageUrl;
 
   final ImagePicker _picker = ImagePicker();
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (widget.initialQuestion != null) {
+      _questionType = widget.initialQuestion!.questionType;
+      _questionText = widget.initialQuestion!.questionText;
+      _questionGrade = widget.initialQuestion!.grade;
+      _options = List<String>.from(widget.initialQuestion!.options ?? []);
+      _correctAnswer = widget.initialQuestion!.correctAnswer;
+      _imageUrl = widget.initialQuestion!.imageUrl;
+    }
+  }
 
   Future<void> _pickImage() async {
     try {
@@ -47,6 +63,12 @@ class AddQuestionState extends State<AddQuestion> {
         );
       }
     }
+  }
+
+  void _removeImage() {
+    setState(() {
+      _imageFile = null;
+    });
   }
 
   Future<String?> _uploadImageToFirebase() async {
@@ -170,21 +192,26 @@ class AddQuestionState extends State<AddQuestion> {
                   });
                 },
               ),
-              if (_imageFile == null)
+              if (_imageFile != null)
+                Stack(
+                  children: [
+                    Image.file(_imageFile!,
+                        height: 100, width: 100, fit: BoxFit.cover),
+                    Positioned(
+                      right: 0,
+                      child: IconButton(
+                        icon: Icon(Icons.close, color: Colors.red),
+                        onPressed: _removeImage,
+                      ),
+                    ),
+                  ],
+                )
+              else
                 ElevatedButton(
                   onPressed: _pickImage,
                   child: Text('Add Image (Optional)'),
-                )
-              else
-                Column(
-                  children: [
-                    Image.file(_imageFile!, height: 100, width: 100),
-                    TextButton(
-                      onPressed: () => setState(() => _imageFile = null),
-                      child: Text('Remove Image'),
-                    ),
-                  ],
                 ),
+              SizedBox(height: 16),
               TextFormField(
                 decoration: InputDecoration(labelText: 'Enter Question'),
                 validator: (value) => value == null || value.isEmpty

@@ -16,11 +16,13 @@ class Studenthome extends StatefulWidget {
 class _StudenthomeState extends State<Studenthome>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  final String userId = FirebaseAuth.instance.currentUser?.uid ?? '';
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    // userId is already initialized as a final variable
   }
 
   @override
@@ -88,29 +90,9 @@ class _StudenthomeState extends State<Studenthome>
                 ),
               ),
             ),
-
-            // DrawerHeader(
-            //   decoration: BoxDecoration(
-            //     color: Colors.blue,
-            //   ),
-            //   child: Text(
-            //     'Menu',
-            //     style: TextStyle(
-            //       color: Colors.white,
-            //       fontSize: 24,
-            //     ),
-            //   ),
-            // ),
             ListTile(
               leading: Icon(Icons.home),
               title: Text('Home'),
-              onTap: () {
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.settings),
-              title: Text('Settings'),
               onTap: () {
                 Navigator.pop(context);
               },
@@ -135,12 +117,6 @@ class _StudenthomeState extends State<Studenthome>
       appBar: AppBar(
         title: Text("Hi, ${UserData.name} "),
         backgroundColor: Colors.blue,
-        actions: [
-          IconButton(
-            icon: Badge.count(child: Icon(Icons.notifications), count: 99),
-            onPressed: () {},
-          ),
-        ],
         bottom: TabBar(
           controller: _tabController,
           tabs: const [
@@ -153,7 +129,10 @@ class _StudenthomeState extends State<Studenthome>
         controller: _tabController,
         children: [
           Center(child: StudentExam()),
-          Center(child: GradeView()),
+          Center(
+              child: GradeView(
+            userId: userId,
+          )),
         ],
       ),
     );
