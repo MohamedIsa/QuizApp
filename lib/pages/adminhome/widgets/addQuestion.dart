@@ -14,11 +14,7 @@ class AddQuestion extends StatefulWidget {
       {super.key, required this.onAddQuestion, this.initialQuestion});
 
   @override
-  @override
-  AddQuestionState createState() {
-    print("Initial Question: ${initialQuestion.toString()}"); // Debugging print
-    return AddQuestionState();
-  }
+  AddQuestionState createState() => AddQuestionState();
 }
 
 class AddQuestionState extends State<AddQuestion> {
@@ -44,14 +40,6 @@ class AddQuestionState extends State<AddQuestion> {
       _options = List<String>.from(widget.initialQuestion!.options ?? []);
       _correctAnswer = widget.initialQuestion!.correctAnswer;
       _imageUrl = widget.initialQuestion!.imageUrl;
-
-      print("Initialized Fields:");
-      print("Type: $_questionType");
-      print("Text: $_questionText");
-      print("Grade: $_questionGrade");
-      print("Options: $_options");
-      print("Correct Answer: $_correctAnswer");
-      print("Image URL: $_imageUrl");
     }
   }
 
@@ -75,6 +63,12 @@ class AddQuestionState extends State<AddQuestion> {
         );
       }
     }
+  }
+
+  void _removeImage() {
+    setState(() {
+      _imageFile = null;
+    });
   }
 
   Future<String?> _uploadImageToFirebase() async {
@@ -198,21 +192,26 @@ class AddQuestionState extends State<AddQuestion> {
                   });
                 },
               ),
-              if (_imageFile == null)
+              if (_imageFile != null)
+                Stack(
+                  children: [
+                    Image.file(_imageFile!,
+                        height: 100, width: 100, fit: BoxFit.cover),
+                    Positioned(
+                      right: 0,
+                      child: IconButton(
+                        icon: Icon(Icons.close, color: Colors.red),
+                        onPressed: _removeImage,
+                      ),
+                    ),
+                  ],
+                )
+              else
                 ElevatedButton(
                   onPressed: _pickImage,
                   child: Text('Add Image (Optional)'),
-                )
-              else
-                Column(
-                  children: [
-                    Image.file(_imageFile!, height: 100, width: 100),
-                    TextButton(
-                      onPressed: () => setState(() => _imageFile = null),
-                      child: Text('Remove Image'),
-                    ),
-                  ],
                 ),
+              SizedBox(height: 16),
               TextFormField(
                 decoration: InputDecoration(labelText: 'Enter Question'),
                 validator: (value) => value == null || value.isEmpty
