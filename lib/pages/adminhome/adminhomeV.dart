@@ -9,7 +9,7 @@ import 'package:project_444/pages/login/user_data.dart';
 
 class Adminhome extends StatelessWidget {
   const Adminhome({super.key});
-
+//===================================================================
   Future<String> fetchUserName() async {
     try {
       final userId = FirebaseAuth.instance.currentUser?.uid;
@@ -30,6 +30,7 @@ class Adminhome extends StatelessWidget {
     }
   }
 
+  //===================================================================
   Future<void> signOut() async {
     try {
       final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -39,11 +40,15 @@ class Adminhome extends StatelessWidget {
     }
   }
 
+//===================================================================
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 2, // Number of tabs
+      length: 2,
       child: Scaffold(
+        //===================================================================
+        // Drawer for navigation
+        //===================================================================
         drawer: Drawer(
           backgroundColor: AppColors.buttonTextColor,
           child: ListView(
@@ -97,26 +102,6 @@ class Adminhome extends StatelessWidget {
                 iconColor: AppColors.buttonColor,
                 textColor: AppColors.textBlack,
                 tileColor: AppColors.buttonTextColor,
-                leading: const Icon(Icons.add),
-                title: const Text('Create Exam'),
-                onTap: () {
-                  Navigator.pushNamed(context, '/createExam');
-                },
-              ),
-              ListTile(
-                iconColor: AppColors.buttonColor,
-                textColor: AppColors.textBlack,
-                tileColor: AppColors.buttonTextColor,
-                leading: const Icon(Icons.settings),
-                title: const Text('Settings'),
-                onTap: () {
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                iconColor: AppColors.buttonColor,
-                textColor: AppColors.textBlack,
-                tileColor: AppColors.buttonTextColor,
                 leading: const Icon(Icons.logout),
                 title: const Text('Logout'),
                 onTap: () async {
@@ -131,6 +116,9 @@ class Adminhome extends StatelessWidget {
             ],
           ),
         ),
+        //===================================================================
+        // AppBar setup
+        //===================================================================
         appBar: AppBar(
           backgroundColor: AppColors.appBarColor,
           iconTheme: IconThemeData(color: AppColors.buttonTextColor),
@@ -156,18 +144,35 @@ class Adminhome extends StatelessWidget {
                       style: TextStyle(
                           fontSize: 18.0, color: AppColors.buttonTextColor),
                     ),
-                    IconButton(
-                      icon: Badge.count(
-                        count: 99,
-                        child: const Icon(Icons.notifications),
-                      ),
-                      onPressed: () {},
-                    ),
+                    StreamBuilder<int>(
+                      stream: _countNegativeGradeStudentsStream(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return Icon(Icons.notifications);
+                        } else if (snapshot.hasError) {
+                          return Icon(Icons.notifications);
+                        } else {
+                          final count = snapshot.data ?? 0;
+                          if (count > 0) {
+                            return Badge.count(
+                              count: count,
+                              child: Icon(Icons.notifications),
+                            );
+                          } else {
+                            return Icon(Icons.notifications);
+                          }
+                        }
+                      },
+                    )
                   ],
                 );
               }
             },
           ),
+          //===================================================================
+          // Body of the Admin Home screen
+          //===================================================================
           bottom: const TabBar(
             labelColor: AppColors.buttonTextColor, // Active tab text color
             unselectedLabelColor: Colors.grey, // Inactive tab text color
@@ -180,12 +185,16 @@ class Adminhome extends StatelessWidget {
             ],
           ),
         ),
+
         body: const TabBarView(
           children: [
             CompleteExamPage(),
             UncompletedExamPage(),
           ],
         ),
+        //===================================================================
+        // Floating Action Button for creating new exam
+        //===================================================================
         floatingActionButton: FloatingActionButton(
           backgroundColor: AppColors.appBarColor,
           child: const Icon(
@@ -199,4 +208,25 @@ class Adminhome extends StatelessWidget {
       ),
     );
   }
+}
+
+Stream<int> _countNegativeGradeStudentsStream() {
+  return FirebaseFirestore.instance
+      .collection('exams')
+      .snapshots()
+      .asyncMap((_) async {
+    int count = 0;
+    final examsSnapshot =
+        await FirebaseFirestore.instance.collection('exams').get();
+    for (var exam in examsSnapshot.docs) {
+      final submissionsSnapshot =
+          await exam.reference.collection('studentsSubmissions').get();
+      for (var submission in submissionsSnapshot.docs) {
+        if (submission.data()['totalGrade'] < 0) {
+          count++;
+        }
+      }
+    }
+    return count;
+  });
 }

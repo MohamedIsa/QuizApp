@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:project_444/constant.dart';
 import 'package:flutter/material.dart';
 import 'package:project_444/pages/login/login_v.dart';
 import 'package:project_444/pages/login/user_data.dart';
@@ -16,11 +17,13 @@ class Studenthome extends StatefulWidget {
 class _StudenthomeState extends State<Studenthome>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  final String userId = FirebaseAuth.instance.currentUser?.uid ?? '';
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    // userId is already initialized as a final variable
   }
 
   @override
@@ -48,12 +51,13 @@ class _StudenthomeState extends State<Studenthome>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.pageColor,
       drawer: Drawer(
         child: ListView(
           children: [
             UserAccountsDrawerHeader(
               decoration: BoxDecoration(
-                color: Colors.blue, // Background color
+                color: AppColors.appBarColor, // Background color
               ),
               accountName: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -74,7 +78,7 @@ class _StudenthomeState extends State<Studenthome>
                     ),
                   ),
                   Divider(
-                    color: Colors.blue, // Divider color
+                    //color: Colors.blue, // Divider color
                     thickness: 1, // Divider thickness
                     endIndent: 0, // To ensure it spans the full width
                     height: 1, // Space before and after divider
@@ -88,36 +92,24 @@ class _StudenthomeState extends State<Studenthome>
                 ),
               ),
             ),
-
-            // DrawerHeader(
-            //   decoration: BoxDecoration(
-            //     color: Colors.blue,
-            //   ),
-            //   child: Text(
-            //     'Menu',
-            //     style: TextStyle(
-            //       color: Colors.white,
-            //       fontSize: 24,
-            //     ),
-            //   ),
-            // ),
             ListTile(
               leading: Icon(Icons.home),
-              title: Text('Home'),
-              onTap: () {
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.settings),
-              title: Text('Settings'),
+              iconColor: AppColors.buttonColor,
+              title: Text(
+                'Home',
+                style: TextStyle(color: AppColors.textBlack),
+              ),
               onTap: () {
                 Navigator.pop(context);
               },
             ),
             ListTile(
               leading: Icon(Icons.logout),
-              title: Text('Logout'),
+              iconColor: AppColors.buttonColor,
+              title: Text(
+                'Logout',
+                style: TextStyle(color: AppColors.textBlack),
+              ),
               onTap: () async {
                 await signOut();
                 Navigator.pushAndRemoveUntil(
@@ -133,8 +125,12 @@ class _StudenthomeState extends State<Studenthome>
         ),
       ),
       appBar: AppBar(
-        title: Text("Hi, ${UserData.name} "),
-        backgroundColor: Colors.blue,
+        title: Text(
+          "Hi, ${UserData.name} ",
+          style: TextStyle(color: AppColors.buttonTextColor),
+        ),
+        iconTheme: const IconThemeData(color: AppColors.buttonTextColor),
+        backgroundColor: AppColors.appBarColor,
         actions: [
           IconButton(
             icon: Badge.count(child: Icon(Icons.notifications), count: 99),
@@ -143,6 +139,9 @@ class _StudenthomeState extends State<Studenthome>
         ],
         bottom: TabBar(
           controller: _tabController,
+          indicatorColor: AppColors.buttonTextColor,
+          labelColor: AppColors.buttonTextColor,
+          unselectedLabelColor: Colors.grey,
           tabs: const [
             Tab(icon: Icon(Icons.book), text: 'Coming Exams'),
             Tab(icon: Icon(Icons.grade), text: 'Grades'),
@@ -153,7 +152,10 @@ class _StudenthomeState extends State<Studenthome>
         controller: _tabController,
         children: [
           Center(child: StudentExam()),
-          Center(child: GradeView()),
+          Center(
+              child: GradeView(
+            userId: userId,
+          )),
         ],
       ),
     );

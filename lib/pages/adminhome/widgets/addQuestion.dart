@@ -2,15 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:project_444/constant.dart';
 import 'package:project_444/firebase_options.dart';
 import 'dart:io';
+import '../../../constant.dart';
 import '../../models/questions.dart';
 
 class AddQuestion extends StatefulWidget {
   final Function(Question) onAddQuestion;
+  final Question? initialQuestion;
 
-  const AddQuestion({super.key, required this.onAddQuestion});
+  const AddQuestion(
+      {super.key, required this.onAddQuestion, this.initialQuestion});
 
   @override
   AddQuestionState createState() => AddQuestionState();
@@ -20,13 +22,27 @@ class AddQuestionState extends State<AddQuestion> {
   final _formKey = GlobalKey<FormState>();
   String _questionType = '';
   String _questionText = '';
-  int _questionGrade = 0; // Ensure this is an int
+  int _questionGrade = 0;
   List<String> _options = ['', '', '', ''];
   String? _correctAnswer;
   File? _imageFile;
   String? _imageUrl;
 
   final ImagePicker _picker = ImagePicker();
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (widget.initialQuestion != null) {
+      _questionType = widget.initialQuestion!.questionType;
+      _questionText = widget.initialQuestion!.questionText;
+      _questionGrade = widget.initialQuestion!.grade;
+      _options = List<String>.from(widget.initialQuestion!.options ?? []);
+      _correctAnswer = widget.initialQuestion!.correctAnswer;
+      _imageUrl = widget.initialQuestion!.imageUrl;
+    }
+  }
 
   Future<void> _pickImage() async {
     try {
@@ -48,6 +64,12 @@ class AddQuestionState extends State<AddQuestion> {
         );
       }
     }
+  }
+
+  void _removeImage() {
+    setState(() {
+      _imageFile = null;
+    });
   }
 
   Future<String?> _uploadImageToFirebase() async {
@@ -121,7 +143,7 @@ class AddQuestionState extends State<AddQuestion> {
       questionText: _questionText,
       options: _options,
       correctAnswer: _correctAnswer,
-      grade: _questionGrade, // grade is now an int
+      grade: _questionGrade,
       imageUrl: _imageUrl,
     );
 
@@ -157,21 +179,16 @@ class AddQuestionState extends State<AddQuestion> {
                 value: _questionType.isEmpty ? null : _questionType,
                 decoration: InputDecoration(
                   labelText: 'Question Type',
-                  labelStyle:
-                      TextStyle(color: AppColors.textBlack), // Label color
+                  labelStyle: TextStyle(color: AppColors.textBlack),
                   hintText: 'Select Question Type',
-                  hintStyle:
-                      TextStyle(color: AppColors.textBlack), // Hint text style
+                  hintStyle: TextStyle(color: AppColors.textBlack),
                   enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(
-                        color:
-                            AppColors.appBarColor), // Border when not focused
+                    borderSide: BorderSide(color: AppColors.appBarColor),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(
-                        color: AppColors.appBarColor,
-                        width: 2), // Border when focused
+                    borderSide:
+                        BorderSide(color: AppColors.appBarColor, width: 2),
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
@@ -198,26 +215,24 @@ class AddQuestionState extends State<AddQuestion> {
               if (_imageFile == null)
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.buttonColor, // Button color
+                    backgroundColor: AppColors.buttonColor,
                   ),
                   onPressed: _pickImage,
                   child: Text(
                     'Add Image (Optional)',
-                    style: TextStyle(
-                        color: AppColors.buttonTextColor), // Button text color
+                    style: TextStyle(color: AppColors.buttonTextColor),
                   ),
                 )
               else
-                Column(
+                Stack(
                   children: [
-                    Image.file(_imageFile!, height: 100, width: 100),
-                    TextButton(
-                      onPressed: () => setState(() => _imageFile = null),
-                      child: Text(
-                        'Remove Image',
-                        style: TextStyle(
-                            color: AppColors
-                                .appBarColor), // Text color for remove image
+                    Image.file(_imageFile!,
+                        height: 100, width: 100, fit: BoxFit.cover),
+                    Positioned(
+                      right: 0,
+                      child: IconButton(
+                        icon: Icon(Icons.close, color: Colors.red),
+                        onPressed: _removeImage,
                       ),
                     ),
                   ],
@@ -226,21 +241,16 @@ class AddQuestionState extends State<AddQuestion> {
               TextFormField(
                 decoration: InputDecoration(
                   labelText: 'Enter Question',
-                  labelStyle:
-                      TextStyle(color: AppColors.textBlack), // Label color
+                  labelStyle: TextStyle(color: AppColors.textBlack),
                   hintText: 'Enter the question text',
-                  hintStyle:
-                      TextStyle(color: AppColors.textBlack), // Hint text style
+                  hintStyle: TextStyle(color: AppColors.textBlack),
                   enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(
-                        color:
-                            AppColors.appBarColor), // Border when not focused
+                    borderSide: BorderSide(color: AppColors.appBarColor),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(
-                        color: AppColors.appBarColor,
-                        width: 2), // Border when focused
+                    borderSide:
+                        BorderSide(color: AppColors.appBarColor, width: 2),
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
@@ -253,21 +263,16 @@ class AddQuestionState extends State<AddQuestion> {
               TextFormField(
                 decoration: InputDecoration(
                   labelText: 'Question Grade',
-                  labelStyle:
-                      TextStyle(color: AppColors.textBlack), // Label color
+                  labelStyle: TextStyle(color: AppColors.textBlack),
                   hintText: 'Enter the question grade',
-                  hintStyle:
-                      TextStyle(color: AppColors.textBlack), // Hint text style
+                  hintStyle: TextStyle(color: AppColors.textBlack),
                   enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(
-                        color:
-                            AppColors.appBarColor), // Border when not focused
+                    borderSide: BorderSide(color: AppColors.appBarColor),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(
-                        color: AppColors.appBarColor,
-                        width: 2), // Border when focused
+                    borderSide:
+                        BorderSide(color: AppColors.appBarColor, width: 2),
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
@@ -278,91 +283,25 @@ class AddQuestionState extends State<AddQuestion> {
                     : null,
                 onChanged: (value) {
                   setState(() {
-                    _questionGrade =
-                        int.tryParse(value) ?? 0; // Ensure it's an integer
+                    _questionGrade = int.tryParse(value) ?? 0;
                   });
                 },
               ),
-              if (_questionType == 'Multiple Choice')
-                ...List.generate(
-                  4,
-                  (index) => Row(
-                    children: [
-                      Radio<String>(
-                        value: _options[index],
-                        groupValue: _correctAnswer,
-                        onChanged: _options[index].isNotEmpty
-                            ? (value) => setState(() => _correctAnswer = value)
-                            : null,
-                      ),
-                      Expanded(
-                        child: TextFormField(
-                          decoration: InputDecoration(
-                            labelText: 'Option ${index + 1}',
-                            labelStyle: TextStyle(
-                                color: AppColors.textBlack), // Label color
-                            hintText: 'Enter option ${index + 1}',
-                            hintStyle: TextStyle(
-                                color: AppColors.textBlack), // Hint text style
-                            enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                  color: AppColors
-                                      .appBarColor), // Border when not focused
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(
-                                  color: AppColors.appBarColor,
-                                  width: 2), // Border when focused
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          onChanged: (value) {
-                            setState(() {
-                              _options[index] = value;
-                            });
-                          },
-                        ),
-                      ),
-                      SizedBox(height: 16),
-                    ],
-                  ),
+              SizedBox(height: 16),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.buttonColor,
                 ),
-              if (_questionType == 'True/False')
-                Column(
-                  children: ['True', 'False']
-                      .map((option) => RadioListTile<String>(
-                            title: Text(option),
-                            value: option,
-                            groupValue: _correctAnswer,
-                            onChanged: (value) =>
-                                setState(() => _correctAnswer = value),
-                          ))
-                      .toList(),
+                onPressed: _submitQuestion,
+                child: Text(
+                  'Save Question',
+                  style: TextStyle(color: AppColors.buttonTextColor),
                 ),
+              ),
             ],
           ),
         ),
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: Text(
-            'Cancel',
-            style: TextStyle(color: AppColors.textBlack),
-          ),
-        ),
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.buttonColor,
-          ),
-          onPressed: _submitQuestion,
-          child: Text(
-            'Add Question',
-            style: TextStyle(color: AppColors.buttonTextColor),
-          ),
-        )
-      ],
     );
   }
 }

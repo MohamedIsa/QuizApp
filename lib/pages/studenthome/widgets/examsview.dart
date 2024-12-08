@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:project_444/constant.dart';
 import 'package:project_444/pages/studenthome/widgets/StudentExamWidget.dart';
 import 'package:project_444/pages/studenthome/widgets/studentexamsession.dart';
 
@@ -120,9 +122,7 @@ class _StudentExamState extends State<StudentExam> {
       if (difference > 0) {
         final timer = Timer(Duration(seconds: difference), () {
           if (mounted) {
-            setState(() {
-              // Update the state if required.
-            });
+            setState(() {});
           }
         });
         _timers.add(timer);
@@ -143,12 +143,14 @@ class _StudentExamState extends State<StudentExam> {
     // Check if the exam is active (within the start and end time)
     if (now.isAfter(startDate) && now.isBefore(endDate)) {
       try {
-        // Get the student's attempts from Firestore
+        FirebaseAuth auth = FirebaseAuth.instance;
+        final user = auth.currentUser;
+        final userId = user!.uid;
         final submissionSnapshot = await FirebaseFirestore.instance
             .collection('exams')
             .doc(examId)
             .collection('studentsSubmissions')
-            .doc('studentId') // Replace with actual student ID logic
+            .doc(userId)
             .get();
 
         // Get the number of attempts made
@@ -200,11 +202,17 @@ class _StudentExamState extends State<StudentExam> {
               ),
               const SizedBox(height: 20),
               ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.buttonColor, // Background color
+                ),
                 onPressed: () {
                   Navigator.of(context).pop();
                   _showConfirmationDialog(context, examId);
                 },
-                child: const Text('Start Exam'),
+                child: const Text(
+                  'Start Exam',
+                  style: TextStyle(color: AppColors.pageColor),
+                ),
               ),
             ],
           ),
@@ -225,9 +233,15 @@ class _StudentExamState extends State<StudentExam> {
               children: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Cancel'),
+                  child: const Text(
+                    'Cancel',
+                    style: TextStyle(color: AppColors.textBlack),
+                  ),
                 ),
                 ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.buttonColor, // Background color
+                  ),
                   onPressed: () {
                     Navigator.of(context).pop();
                     Navigator.push(
@@ -238,7 +252,10 @@ class _StudentExamState extends State<StudentExam> {
                       ),
                     );
                   },
-                  child: const Text('Start Exam'),
+                  child: const Text(
+                    'Start Exam',
+                    style: TextStyle(color: AppColors.pageColor),
+                  ),
                 ),
               ],
             )

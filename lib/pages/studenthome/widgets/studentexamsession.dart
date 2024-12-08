@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart'; // For Firebase Authentication
+import 'package:project_444/constant.dart';
 import 'package:project_444/pages/questions/Allexam.dart';
 
 class Exam {
@@ -100,8 +101,15 @@ class _StudentExamSessionState extends State<StudentExamSession> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.pageColor,
       appBar: AppBar(
-        title: Text(_exam?.examName ?? 'Exam Session'),
+        automaticallyImplyLeading: false,
+        centerTitle: true,
+        backgroundColor: AppColors.appBarColor,
+        title: Text(
+          _exam?.examName ?? 'Exam Session',
+          style: TextStyle(color: AppColors.pageColor),
+        ),
       ),
       body: SingleChildScrollView(
         child: Padding(

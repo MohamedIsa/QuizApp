@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:project_444/constant.dart';
 
 class Loading extends StatefulWidget {
   const Loading({super.key});
@@ -21,10 +22,10 @@ class _LoadingState extends State<Loading> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.blue[300],
+      backgroundColor: AppColors.txtblue,
       body: const Center(
-        child: SpinKitFadingCube(
-          color: Colors.white,
+        child: SpinKitSquareCircle(
+          color: AppColors.appBarColor,
           size: 50.0,
         ),
       ),
