@@ -18,7 +18,7 @@ class SnackbarUtils {
         style: TextStyle(color: Colors.white), // Text color
       ),
       backgroundColor: AppColors.buttonColor, // Background color for success
-      duration: Duration(seconds: 3), // Duration for the snackbar
+      duration: Duration(seconds: 2), // Duration for the snackbar
     );
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
@@ -31,7 +31,7 @@ class SnackbarUtils {
         style: TextStyle(color: Colors.white), // Text color
       ),
       backgroundColor: Colors.red, // Background color for error
-      duration: Duration(seconds: 3), // Duration for the snackbar
+      duration: Duration(seconds: 2), // Duration for the snackbar
     );
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }

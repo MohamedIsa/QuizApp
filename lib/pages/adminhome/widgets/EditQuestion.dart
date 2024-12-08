@@ -260,18 +260,17 @@ class _EditQuestionState extends State<EditQuestion> {
           TextButton(
             onPressed: () async {
               if (question.isEmpty || questionGrade.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Please fill all required fields')),
-                );
+                SnackbarUtils.showErrorSnackbar(
+                    context, 'Please fill all required fields');
+
                 return;
               }
 
               if ((questionType == 'Multiple Choice' ||
                       questionType == 'True/False') &&
                   correctAnswer == null) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Please select correct answer')),
-                );
+                SnackbarUtils.showErrorSnackbar(
+                    context, 'Please select correct answer');
                 return;
               }
 
