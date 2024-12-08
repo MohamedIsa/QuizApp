@@ -1,10 +1,8 @@
 import 'dart:async';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:project_444/constant.dart';
 import 'package:project_444/pages/questions/StudentSearch/StudentQuestionWidget.dart';
-import 'package:project_444/pages/studenthome/widgets/StudentExamSession.dart';
 
 class SearchQuestionForUser extends StatefulWidget {
   const SearchQuestionForUser({Key? key}) : super(key: key);
@@ -43,10 +41,8 @@ class _SearchQuestionForUserState extends State<SearchQuestionForUser> {
           _buildSearchBar(), // Search bar
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance
-                  .collection('exams')
-                  .where('startDate')
-                  .snapshots(),
+              stream:
+                  FirebaseFirestore.instance.collection('exams').snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());

@@ -1,3 +1,6 @@
+// This Page is Blocked due to user's attempts
+// So user can't go into the exam from (Search Student area)
+
 import 'package:flutter/material.dart';
 
 class StudentExamSession extends StatelessWidget {

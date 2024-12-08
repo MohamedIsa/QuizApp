@@ -4,8 +4,8 @@ class StudentQuestionWidget extends StatelessWidget {
   final String examName;
   final String questionText;
   final String questionType;
-  final String questionId; // Fetch QuestionID
-  final VoidCallback onTap; // for tap use
+  final String questionId;
+  final VoidCallback onTap;
 
   const StudentQuestionWidget({
     Key? key,
@@ -18,32 +18,47 @@ class StudentQuestionWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      title: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Display the exam name
-          Text(
-            examName,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 18,
-            ),
-          ),
-          const SizedBox(height: 8),
-          // Display the question
-          Text(
-            questionText,
-            style: const TextStyle(fontSize: 16),
-          ),
-          // Display the question type
-          Text(
-            'Type: $questionType',
-            style: const TextStyle(fontSize: 14, color: Colors.grey),
-          ),
-        ],
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
       ),
-      onTap: onTap, // Open exam when user click on question
+      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Exam: $examName',
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Question: $questionText',
+                style: const TextStyle(
+                  fontSize: 16,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Type: $questionType',
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
