@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:project_444/constant.dart';
 import 'package:project_444/firebase_options.dart';
 import 'dart:io';
 import '../../models/questions.dart';
@@ -141,16 +142,39 @@ class AddQuestionState extends State<AddQuestion> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Add New Question'),
+      title: Text(
+        'Add New Question',
+        style: TextStyle(color: AppColors.textBlack),
+      ),
       content: Form(
         key: _formKey,
         child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 value: _questionType.isEmpty ? null : _questionType,
-                decoration: InputDecoration(labelText: 'Question Type'),
+                decoration: InputDecoration(
+                  labelText: 'Question Type',
+                  labelStyle:
+                      TextStyle(color: AppColors.textBlack), // Label color
+                  hintText: 'Select Question Type',
+                  hintStyle:
+                      TextStyle(color: AppColors.textBlack), // Hint text style
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                        color:
+                            AppColors.appBarColor), // Border when not focused
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                        color: AppColors.appBarColor,
+                        width: 2), // Border when focused
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
                 items: [
                   'Multiple Choice',
                   'True/False',
@@ -170,10 +194,18 @@ class AddQuestionState extends State<AddQuestion> {
                   });
                 },
               ),
+              SizedBox(height: 16),
               if (_imageFile == null)
                 ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.buttonColor, // Button color
+                  ),
                   onPressed: _pickImage,
-                  child: Text('Add Image (Optional)'),
+                  child: Text(
+                    'Add Image (Optional)',
+                    style: TextStyle(
+                        color: AppColors.buttonTextColor), // Button text color
+                  ),
                 )
               else
                 Column(
@@ -181,19 +213,64 @@ class AddQuestionState extends State<AddQuestion> {
                     Image.file(_imageFile!, height: 100, width: 100),
                     TextButton(
                       onPressed: () => setState(() => _imageFile = null),
-                      child: Text('Remove Image'),
+                      child: Text(
+                        'Remove Image',
+                        style: TextStyle(
+                            color: AppColors
+                                .appBarColor), // Text color for remove image
+                      ),
                     ),
                   ],
                 ),
+              SizedBox(height: 16),
               TextFormField(
-                decoration: InputDecoration(labelText: 'Enter Question'),
+                decoration: InputDecoration(
+                  labelText: 'Enter Question',
+                  labelStyle:
+                      TextStyle(color: AppColors.textBlack), // Label color
+                  hintText: 'Enter the question text',
+                  hintStyle:
+                      TextStyle(color: AppColors.textBlack), // Hint text style
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                        color:
+                            AppColors.appBarColor), // Border when not focused
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                        color: AppColors.appBarColor,
+                        width: 2), // Border when focused
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
                 validator: (value) => value == null || value.isEmpty
                     ? 'Question cannot be empty'
                     : null,
                 onChanged: (value) => _questionText = value,
               ),
+              SizedBox(height: 16),
               TextFormField(
-                decoration: InputDecoration(labelText: 'Question Grade'),
+                decoration: InputDecoration(
+                  labelText: 'Question Grade',
+                  labelStyle:
+                      TextStyle(color: AppColors.textBlack), // Label color
+                  hintText: 'Enter the question grade',
+                  hintStyle:
+                      TextStyle(color: AppColors.textBlack), // Hint text style
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                        color:
+                            AppColors.appBarColor), // Border when not focused
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                        color: AppColors.appBarColor,
+                        width: 2), // Border when focused
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
                 keyboardType: TextInputType.number,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 validator: (value) => value == null || value.isEmpty
@@ -208,31 +285,49 @@ class AddQuestionState extends State<AddQuestion> {
               ),
               if (_questionType == 'Multiple Choice')
                 ...List.generate(
-                    4,
-                    (index) => Row(
-                          children: [
-                            Radio<String>(
-                              value: _options[index],
-                              groupValue: _correctAnswer,
-                              onChanged: _options[index].isNotEmpty
-                                  ? (value) =>
-                                      setState(() => _correctAnswer = value)
-                                  : null,
+                  4,
+                  (index) => Row(
+                    children: [
+                      Radio<String>(
+                        value: _options[index],
+                        groupValue: _correctAnswer,
+                        onChanged: _options[index].isNotEmpty
+                            ? (value) => setState(() => _correctAnswer = value)
+                            : null,
+                      ),
+                      Expanded(
+                        child: TextFormField(
+                          decoration: InputDecoration(
+                            labelText: 'Option ${index + 1}',
+                            labelStyle: TextStyle(
+                                color: AppColors.textBlack), // Label color
+                            hintText: 'Enter option ${index + 1}',
+                            hintStyle: TextStyle(
+                                color: AppColors.textBlack), // Hint text style
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                  color: AppColors
+                                      .appBarColor), // Border when not focused
+                              borderRadius: BorderRadius.circular(8),
                             ),
-                            Expanded(
-                              child: TextFormField(
-                                decoration: InputDecoration(
-                                  labelText: 'Option ${index + 1}',
-                                ),
-                                onChanged: (value) {
-                                  setState(() {
-                                    _options[index] = value;
-                                  });
-                                },
-                              ),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                  color: AppColors.appBarColor,
+                                  width: 2), // Border when focused
+                              borderRadius: BorderRadius.circular(8),
                             ),
-                          ],
-                        )),
+                          ),
+                          onChanged: (value) {
+                            setState(() {
+                              _options[index] = value;
+                            });
+                          },
+                        ),
+                      ),
+                      SizedBox(height: 16),
+                    ],
+                  ),
+                ),
               if (_questionType == 'True/False')
                 Column(
                   children: ['True', 'False']
@@ -252,12 +347,21 @@ class AddQuestionState extends State<AddQuestion> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text('Cancel'),
+          child: Text(
+            'Cancel',
+            style: TextStyle(color: AppColors.textBlack),
+          ),
         ),
         ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.buttonColor,
+          ),
           onPressed: _submitQuestion,
-          child: Text('Add Question'),
-        ),
+          child: Text(
+            'Add Question',
+            style: TextStyle(color: AppColors.buttonTextColor),
+          ),
+        )
       ],
     );
   }

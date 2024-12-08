@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:project_444/constant.dart';
 import 'package:project_444/pages/adminhome/widgets/addQuestionExam.dart';
 
 class AddExamWidget extends StatefulWidget {
@@ -105,7 +106,6 @@ class _AddExamWidgetState extends State<AddExamWidget> {
           'endDate': _endDate!.toIso8601String(),
         });
 
-        _showSnackBar('Exam created successfully.', Colors.green);
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -136,7 +136,14 @@ class _AddExamWidgetState extends State<AddExamWidget> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Add New Exam")),
+      appBar: AppBar(
+        iconTheme: const IconThemeData(color: AppColors.buttonTextColor),
+        title: const Text(
+          "Add New Exam",
+          style: TextStyle(color: AppColors.buttonTextColor),
+        ),
+        backgroundColor: AppColors.appBarColor,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
@@ -145,7 +152,36 @@ class _AddExamWidgetState extends State<AddExamWidget> {
             children: [
               TextFormField(
                 controller: _examNameController,
-                decoration: const InputDecoration(labelText: "Exam Name"),
+                decoration: InputDecoration(
+                  labelText: "Exam Name",
+                  labelStyle: const TextStyle(
+                      color: AppColors.textBlack), // Label color
+                  hintText: "Enter the exam name", // Placeholder text
+                  hintStyle: const TextStyle(
+                      color: AppColors.textBlack), // Placeholder style
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: const BorderSide(
+                        color: AppColors.appBarColor), // Border color
+                    borderRadius: BorderRadius.circular(8), // Rounded corners
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: const BorderSide(
+                        color: AppColors.appBarColor,
+                        width: 2), // Border when focused
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  errorBorder: OutlineInputBorder(
+                    borderSide: const BorderSide(
+                        color: Colors.red), // Border for errors
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  focusedErrorBorder: OutlineInputBorder(
+                    borderSide: const BorderSide(color: Colors.red, width: 2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  prefixIcon: const Icon(Icons.edit,
+                      color: AppColors.appBarColor), // Icon
+                ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return "Please enter the exam name.";
@@ -153,10 +189,34 @@ class _AddExamWidgetState extends State<AddExamWidget> {
                   return null;
                 },
               ),
+              const SizedBox(height: 16), // Space between fields
               TextFormField(
                 controller: _attemptsController,
-                decoration:
-                    const InputDecoration(labelText: "Number of Attempts"),
+                decoration: InputDecoration(
+                  labelText: "Number of Attempts",
+                  labelStyle: const TextStyle(color: AppColors.textBlack),
+                  hintText: "Enter number of attempts",
+                  hintStyle: const TextStyle(color: AppColors.textBlack),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: const BorderSide(color: AppColors.appBarColor),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: const BorderSide(
+                        color: AppColors.appBarColor, width: 2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  errorBorder: OutlineInputBorder(
+                    borderSide: const BorderSide(color: Colors.red),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  focusedErrorBorder: OutlineInputBorder(
+                    borderSide: const BorderSide(color: Colors.red, width: 2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  prefixIcon:
+                      const Icon(Icons.replay, color: AppColors.appBarColor),
+                ),
                 keyboardType: TextInputType.number,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 validator: (value) {
@@ -170,10 +230,34 @@ class _AddExamWidgetState extends State<AddExamWidget> {
                   return null;
                 },
               ),
+              const SizedBox(height: 16), // Space between fields
               TextFormField(
                 controller: _durationController,
-                decoration:
-                    const InputDecoration(labelText: "Duration (minutes)"),
+                decoration: InputDecoration(
+                  labelText: "Duration (minutes)",
+                  labelStyle: const TextStyle(color: AppColors.textBlack),
+                  hintText: "Enter duration in minutes",
+                  hintStyle: const TextStyle(color: AppColors.textBlack),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: const BorderSide(color: AppColors.appBarColor),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: const BorderSide(
+                        color: AppColors.appBarColor, width: 2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  errorBorder: OutlineInputBorder(
+                    borderSide: const BorderSide(color: Colors.red),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  focusedErrorBorder: OutlineInputBorder(
+                    borderSide: const BorderSide(color: Colors.red, width: 2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  prefixIcon:
+                      const Icon(Icons.timer, color: AppColors.appBarColor),
+                ),
                 keyboardType: TextInputType.number,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 validator: (value) {
@@ -187,31 +271,69 @@ class _AddExamWidgetState extends State<AddExamWidget> {
                   return null;
                 },
               ),
-              ListTile(
-                title: Text(
-                  "Start Date: ${_startDate != null ? _startDate!.toString() : 'Select Start Date'}",
+              const SizedBox(height: 16),
+              Container(
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: AppColors.appBarColor, // Border color
+                    width: 1, // Border width
+                  ),
+                  borderRadius: BorderRadius.circular(8), // Rounded corners
                 ),
-                trailing: const Icon(Icons.calendar_today),
-                onTap: () => _pickDateTime(context, isStart: true),
+                child: ListTile(
+                  title: Text(
+                    "Start Date: ${_startDate != null ? _startDate!.toString() : 'Select Start Date'}",
+                    style: const TextStyle(
+                        color: AppColors.textBlack), // Text color
+                  ),
+                  trailing: const Icon(
+                    Icons.calendar_today,
+                    color: AppColors.appBarColor, // Icon color
+                  ),
+                  onTap: () => _pickDateTime(context, isStart: true),
+                ),
               ),
-              ListTile(
-                title: Text(
-                  "End Date: ${_endDate != null ? _endDate!.toString() : 'Select End Date'}",
+              const SizedBox(height: 10), // Space between ListTile items
+              Container(
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: AppColors.appBarColor, // Border color
+                    width: 1, // Border width
+                  ),
+                  borderRadius: BorderRadius.circular(8), // Rounded corners
                 ),
-                trailing: const Icon(Icons.calendar_today),
-                onTap: () => _pickDateTime(context, isStart: false),
+                child: ListTile(
+                  title: Text(
+                    "End Date: ${_endDate != null ? _endDate!.toString() : 'Select End Date'}",
+                    style: const TextStyle(
+                        color: AppColors.textBlack), // Text color
+                  ),
+                  trailing: const Icon(
+                    Icons.calendar_today,
+                    color: AppColors.appBarColor, // Icon color
+                  ),
+                  onTap: () => _pickDateTime(context, isStart: false),
+                ),
               ),
               const SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.buttonColor,
+                    ),
                     onPressed: _saveExam,
-                    child: const Text("Next"),
+                    child: const Text(
+                        style: TextStyle(color: AppColors.buttonTextColor),
+                        "Next"),
                   ),
                   ElevatedButton(
                     onPressed: _clearForm,
-                    child: const Text("Clear"),
+                    child: const Text(
+                      "Clear",
+                      style: TextStyle(color: AppColors.textBlack),
+                    ),
                   ),
                 ],
               ),

@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:project_444/constant.dart';
 import 'package:project_444/pages/adminhome/widgets/editExamQuestions.dart';
 
 class EditExamPage extends StatefulWidget {
@@ -162,16 +163,44 @@ class _EditExamPageState extends State<EditExamPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Edit Exam")),
+      appBar: AppBar(
+        iconTheme: IconThemeData(color: AppColors.buttonTextColor),
+        backgroundColor: AppColors.appBarColor,
+        title: const Text(
+          "Edit Exam",
+          style: TextStyle(color: AppColors.buttonTextColor),
+        ),
+        centerTitle: true,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
           child: ListView(
             children: [
+              const SizedBox(height: 20),
               TextFormField(
                 controller: _examNameController,
-                decoration: const InputDecoration(labelText: "Exam Name"),
+                decoration: InputDecoration(
+                  labelText: "Exam Name",
+                  labelStyle:
+                      TextStyle(color: AppColors.textBlack), // Label color
+                  hintText: "Enter the exam name",
+                  hintStyle:
+                      TextStyle(color: AppColors.textBlack), // Hint text style
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                        color:
+                            AppColors.appBarColor), // Border when not focused
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                        color: AppColors.appBarColor,
+                        width: 2), // Border when focused
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return "Please enter the exam name.";
@@ -179,10 +208,29 @@ class _EditExamPageState extends State<EditExamPage> {
                   return null;
                 },
               ),
+              const SizedBox(height: 20),
               TextFormField(
                 controller: _attemptsController,
-                decoration:
-                    const InputDecoration(labelText: "Number of Attempts"),
+                decoration: InputDecoration(
+                  labelText: "Number of Attempts",
+                  labelStyle:
+                      TextStyle(color: AppColors.textBlack), // Label color
+                  hintText: "Enter number of attempts",
+                  hintStyle:
+                      TextStyle(color: AppColors.textBlack), // Hint text style
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                        color:
+                            AppColors.appBarColor), // Border when not focused
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                        color: AppColors.appBarColor,
+                        width: 2), // Border when focused
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
                 keyboardType: TextInputType.number,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 validator: (value) {
@@ -196,10 +244,29 @@ class _EditExamPageState extends State<EditExamPage> {
                   return null;
                 },
               ),
+              const SizedBox(height: 20),
               TextFormField(
                 controller: _durationController,
-                decoration:
-                    const InputDecoration(labelText: "Duration (minutes)"),
+                decoration: InputDecoration(
+                  labelText: "Duration (minutes)",
+                  labelStyle:
+                      TextStyle(color: AppColors.textBlack), // Label color
+                  hintText: "Enter duration in minutes",
+                  hintStyle:
+                      TextStyle(color: AppColors.textBlack), // Hint text style
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                        color:
+                            AppColors.appBarColor), // Border when not focused
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                        color: AppColors.appBarColor,
+                        width: 2), // Border when focused
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
                 keyboardType: TextInputType.number,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 validator: (value) {
@@ -213,29 +280,60 @@ class _EditExamPageState extends State<EditExamPage> {
                   return null;
                 },
               ),
-              ListTile(
-                title: Text(
-                  "Start Date: ${_startDate != null ? _startDate!.toString() : 'Select Start Date'}",
+              const SizedBox(height: 20),
+              Container(
+                decoration: BoxDecoration(
+                  border:
+                      Border.all(color: AppColors.appBarColor), // Border color
+                  borderRadius: BorderRadius.circular(8), // Rounded corners
                 ),
-                trailing: const Icon(Icons.calendar_today),
-                onTap: () => _pickDateTime(context, isStart: true),
+                child: ListTile(
+                  title: Text(
+                    "Start Date: ${_startDate != null ? _startDate!.toString() : 'Select Start Date'}",
+                    style: TextStyle(
+                        color: AppColors.textBlack), // Title text color
+                  ),
+                  trailing: Icon(Icons.calendar_today,
+                      color: AppColors.appBarColor), // Icon color
+                  onTap: () => _pickDateTime(context, isStart: true),
+                ),
               ),
-              ListTile(
-                title: Text(
-                  "End Date: ${_endDate != null ? _endDate!.toString() : 'Select End Date'}",
+              const SizedBox(height: 20),
+              Container(
+                decoration: BoxDecoration(
+                  border:
+                      Border.all(color: AppColors.appBarColor), // Border color
+                  borderRadius: BorderRadius.circular(8), // Rounded corners
                 ),
-                trailing: const Icon(Icons.calendar_today),
-                onTap: () => _pickDateTime(context, isStart: false),
+                child: ListTile(
+                  title: Text(
+                    "End Date: ${_endDate != null ? _endDate!.toString() : 'Select End Date'}",
+                    style: TextStyle(
+                        color: AppColors.textBlack), // Title text color
+                  ),
+                  trailing: Icon(Icons.calendar_today,
+                      color: AppColors.appBarColor), // Icon color
+                  onTap: () => _pickDateTime(context, isStart: false),
+                ),
               ),
               const SizedBox(height: 20),
               Column(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.buttonColor,
+                    ),
                     onPressed: _saveExam,
-                    child: const Text("Save Changes"),
+                    child: const Text(
+                      "Save Changes",
+                      style: TextStyle(color: AppColors.buttonTextColor),
+                    ),
                   ),
                   ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.buttonColor,
+                    ),
                     onPressed: () => Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -243,7 +341,10 @@ class _EditExamPageState extends State<EditExamPage> {
                             examId: widget.Eid,
                           ),
                         )),
-                    child: const Text("Edit Questions"),
+                    child: const Text(
+                      "Edit Questions",
+                      style: TextStyle(color: AppColors.buttonTextColor),
+                    ),
                   ),
                   ElevatedButton(
                     onPressed: () {
@@ -260,21 +361,30 @@ class _EditExamPageState extends State<EditExamPage> {
                                 onPressed: () {
                                   Navigator.pop(context); // Close the dialog
                                 },
-                                child: const Text("Cancel"),
+                                child: const Text(
+                                  "Cancel",
+                                  style: TextStyle(color: AppColors.textBlack),
+                                ),
                               ),
                               TextButton(
                                 onPressed: () {
                                   _deleteExam(); // Delete the exam
                                   Navigator.pop(context); // Close the dialog
                                 },
-                                child: const Text("Delete"),
+                                child: const Text(
+                                  "Delete",
+                                  style: TextStyle(color: Colors.red),
+                                ),
                               ),
                             ],
                           );
                         },
                       );
                     },
-                    child: const Text("Delete Exam"),
+                    child: const Text(
+                      "Delete Exam",
+                      style: TextStyle(color: Colors.red),
+                    ),
                   ),
                 ],
               ),

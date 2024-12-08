@@ -54,15 +54,25 @@ class _UncompletedExamPageState extends State<UncompletedExamPage> {
             controller: searchController,
             decoration: InputDecoration(
               labelText: 'Search Exam...',
+              prefixIcon: const Icon(Icons.search), // Search icon added
               suffixIcon: IconButton(
-                icon: Icon(Icons.clear),
+                icon: const Icon(Icons.clear),
                 onPressed: () {
                   searchController.clear();
-                  setState(() {});
+                  setState(() {
+                    // Optionally clear the search query or perform any other action
+                  });
                 },
               ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10), // Rounded corners
+              ),
             ),
-            onChanged: (_) => setState(() {}),
+            onChanged: (_) {
+              setState(() {
+                // Add any necessary state changes when the search query changes
+              });
+            },
           ),
         ),
         Expanded(

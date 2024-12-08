@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:project_444/constant.dart';
 import 'package:project_444/pages/adminhome/widgets/addQuestion.dart';
 import '../../models/questions.dart';
 
@@ -154,8 +155,13 @@ class _AddQuestionExamState extends State<AddQuestionExam> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Add Questions"),
+        backgroundColor: AppColors.appBarColor,
+        title: Text(
+          "Add Questions",
+          style: TextStyle(color: AppColors.buttonTextColor),
+        ),
         automaticallyImplyLeading: false,
+        centerTitle: true,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -178,14 +184,15 @@ class _AddQuestionExamState extends State<AddQuestionExam> {
                               children: [
                                 TextSpan(
                                   text: 'Type: ${_questions[index]['type']}',
-                                  style: TextStyle(color: Colors.blue),
+                                  style: TextStyle(color: AppColors.textBlack),
                                 ),
                                 if (_questions[index]['type'] ==
                                     'Multiple Choice')
                                   TextSpan(
                                     text:
                                         '\nOptions: ${_questions[index]['options'].join(', ')}',
-                                    style: TextStyle(color: Colors.blue),
+                                    style:
+                                        TextStyle(color: AppColors.textBlack),
                                   ),
                                 if (_questions[index]['type'] == 'True/False' ||
                                     _questions[index]['type'] ==
@@ -193,12 +200,13 @@ class _AddQuestionExamState extends State<AddQuestionExam> {
                                   TextSpan(
                                     text:
                                         '\nCorrect Answer: ${_questions[index]['correctAnswer']}',
-                                    style: TextStyle(color: Colors.blue),
+                                    style:
+                                        TextStyle(color: AppColors.textBlack),
                                   ),
                                 TextSpan(
                                   text:
                                       '\nGrade: ${_questions[index]['Questiongrade']}',
-                                  style: TextStyle(color: Colors.blue),
+                                  style: TextStyle(color: AppColors.textBlack),
                                 ),
                               ],
                             ),
@@ -220,7 +228,8 @@ class _AddQuestionExamState extends State<AddQuestionExam> {
                         children: [
                           IconButton(
                             onPressed: () => _editQuestionDialog(index),
-                            icon: Icon(Icons.edit, color: Colors.orange),
+                            icon:
+                                Icon(Icons.edit, color: AppColors.buttonColor),
                           ),
                           IconButton(
                             onPressed: () => _removeQuestion(index),
@@ -235,9 +244,18 @@ class _AddQuestionExamState extends State<AddQuestionExam> {
             ),
             SizedBox(height: 20),
             ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.buttonColor,
+              ),
               onPressed: _addQuestionDialog,
-              icon: Icon(Icons.add),
-              label: Text("Add Question"),
+              icon: Icon(
+                Icons.add,
+                color: AppColors.buttonTextColor,
+              ),
+              label: Text(
+                "Add Question",
+                style: TextStyle(color: AppColors.buttonTextColor),
+              ),
             ),
             SizedBox(height: 20),
             Row(
@@ -245,11 +263,20 @@ class _AddQuestionExamState extends State<AddQuestionExam> {
               children: [
                 OutlinedButton(
                   onPressed: _cancelExam,
-                  child: Text("Cancel"),
+                  child: Text(
+                    "Cancel",
+                    style: TextStyle(color: AppColors.textBlack),
+                  ),
                 ),
                 ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.buttonColor,
+                  ),
                   onPressed: _createExam,
-                  child: Text("Create Exam"),
+                  child: Text(
+                    "Create Exam",
+                    style: TextStyle(color: AppColors.buttonTextColor),
+                  ),
                 ),
               ],
             ),
