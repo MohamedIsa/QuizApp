@@ -5,6 +5,7 @@ import 'package:project_444/pages/login/login_v.dart';
 import 'package:project_444/pages/login/user_data.dart';
 import 'widgets/examsview.dart';
 import 'widgets/gradeview.dart';
+import 'package:project_444/pages/questions/StudentSearch/Search_questionforuser.dart';
 
 class Studenthome extends StatefulWidget {
   final String name;
@@ -101,6 +102,21 @@ class _StudenthomeState extends State<Studenthome>
               ),
               onTap: () {
                 Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.search),
+              iconColor: AppColors.buttonColor,
+              title: Text(
+                'Search for question',
+                style: TextStyle(color: AppColors.textBlack),
+              ),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const SearchQuestionForUser()),
+                );
               },
             ),
             ListTile(
