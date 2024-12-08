@@ -56,6 +56,7 @@ class _AllExamState extends State<AllExam> {
 
   void _submitExam() async {
     try {
+      // Get all question IDs from the exam
       final examSnapshot = await FirebaseFirestore.instance
           .collection('exams')
           .doc(widget.examId)
@@ -75,10 +76,13 @@ class _AllExamState extends State<AllExam> {
         }),
       );
 
+      // Create a map of all question IDs
       final allQuestionIds =
           questions.map((q) => q['questionId'] as String).toSet();
 
+      // Populate unanswered questions with default values
       for (var qid in allQuestionIds) {
+        // Check if this question is already in studentAnswers
         if (!studentAnswers.any((answer) => answer.Qid == qid)) {
           studentAnswers.add(StudentQuestionsAnswers(
             Qid: qid,
@@ -88,6 +92,15 @@ class _AllExamState extends State<AllExam> {
         }
       }
 
+      // Check if all answers have 'none' value and set totalGrade to 0
+      if (studentAnswers.every((answer) => answer.AnswerValue == 'none')) {
+        totalGrade = 0;
+      } else if (questions
+          .any((q) => q['type'] == "Short Answer" || q['type'] == "Essay")) {
+        totalGrade = -1;
+      }
+
+      // Prepare the answers list
       List<Map<String, dynamic>> answersList = studentAnswers.map((answer) {
         return {
           'Qid': answer.Qid,
@@ -96,27 +109,32 @@ class _AllExamState extends State<AllExam> {
         };
       }).toList();
 
+      // Reference to the student submission document in exam collection
       final examSubmissionRef = FirebaseFirestore.instance
           .collection('exams')
           .doc(widget.examId)
           .collection('studentsSubmissions')
           .doc(widget.Sid);
 
+      // Reference to the student submission document in user collection
       final userSubmissionRef = FirebaseFirestore.instance
           .collection('users')
           .doc(widget.Sid)
           .collection('studentanswer')
           .doc(widget.examId);
 
+      // Run transaction to handle submission
       await FirebaseFirestore.instance.runTransaction((transaction) async {
         final examSubmissionSnapshot = await transaction.get(examSubmissionRef);
 
         int currentAttempts = 0;
 
         if (examSubmissionSnapshot.exists) {
+          // If the document exists, get the current attempts count
           currentAttempts = examSubmissionSnapshot.data()?['attempts'] ?? 0;
         }
 
+        // Prepare the submission data
         Map<String, dynamic> studentExamAnswer = {
           'Sname': widget.Sname,
           'Sid': widget.Sid,
@@ -130,18 +148,24 @@ class _AllExamState extends State<AllExam> {
           'examName': examData['examName'] ?? 'Unnamed Exam',
         };
 
+        // Update or create the submission document in exam collection
         transaction.set(examSubmissionRef, studentExamAnswer);
+
+        // Update or create the submission document in user collection
         transaction.set(userSubmissionRef, studentExamAnswer);
       });
 
       if (mounted) {
-        SnackbarUtils.showSuccessSnackbar(
-            context, 'Exam submitted successfully!');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Exam submitted successfully!")),
+        );
         Navigator.pop(context);
       }
     } catch (e) {
       if (mounted) {
-        SnackbarUtils.showErrorSnackbar(context, 'Error: $e');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error: $e")),
+        );
       }
     }
   }
