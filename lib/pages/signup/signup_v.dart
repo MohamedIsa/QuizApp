@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:project_444/constant.dart';
 import '../../utils/texfield.dart';
 import '../../utils/withgoogle.dart';
 import 'package:project_444/pages/signup/signup_vm.dart';
@@ -14,9 +15,14 @@ class SignUp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.pageColor,
       appBar: AppBar(
-        title: const Text('Sign Up Page'),
-        backgroundColor: Colors.green,
+        centerTitle: true,
+        title: const Text(
+          'Sign Up Page',
+          style: TextStyle(color: AppColors.buttonTextColor),
+        ),
+        backgroundColor: AppColors.appBarColor,
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -41,28 +47,28 @@ class SignUp extends StatelessWidget {
             ReusableTextField(
               'Enter the Name',
               Icons.person,
-              Colors.red,
+              AppColors.buttonColor,
               false,
               name,
             ),
             ReusableTextField(
               'Enter the Email',
               Icons.email,
-              Colors.red,
+              AppColors.buttonColor,
               false,
               email,
             ),
             ReusableTextField(
               'Enter the Password',
               Icons.lock,
-              Colors.red,
+              AppColors.buttonColor,
               true,
               password,
             ),
             ReusableTextField(
               'Confirm Password',
               Icons.lock,
-              Colors.red,
+              AppColors.buttonColor,
               true,
               cpassword,
             ),
@@ -70,7 +76,7 @@ class SignUp extends StatelessWidget {
               margin: const EdgeInsets.all(16.0),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16.0),
-                color: Colors.blue,
+                color: AppColors.buttonColor,
               ),
               child: Material(
                 color: Colors.transparent,

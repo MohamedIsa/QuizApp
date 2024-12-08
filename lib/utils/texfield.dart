@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:project_444/constant.dart';
 
 class ReusableTextField extends StatefulWidget {
   //===================================================================
@@ -39,7 +40,7 @@ class _ReusableTextFieldState extends State<ReusableTextField> {
     return Container(
       margin: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        color: Colors.grey[200],
+        color: AppColors.txtblue,
         borderRadius: BorderRadius.circular(10.0),
       ),
       child: TextField(

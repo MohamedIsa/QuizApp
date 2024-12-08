@@ -1,6 +1,7 @@
 // countdown_timer.dart
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:project_444/constant.dart';
 
 class CountdownTimer extends StatefulWidget {
   final int duration; // Duration in seconds
@@ -64,12 +65,16 @@ class _CountdownTimerState extends State<CountdownTimer> {
       children: [
         LinearProgressIndicator(
           value: _progress,
+          color: AppColors.buttonColor,
           minHeight: 8,
         ),
         SizedBox(height: 20),
         Text(
           'Time Remaining: ${getFormattedTime()}',
-          style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+          style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: AppColors.buttonColor),
         ),
       ],
     );

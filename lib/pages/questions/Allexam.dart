@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:project_444/constant.dart';
 import 'package:project_444/pages/questions/essayQuestion.dart';
 import 'package:project_444/pages/questions/msqQuestion.dart';
 import 'package:project_444/pages/questions/shortAnswerQuestion.dart';
@@ -15,13 +16,13 @@ class AllExam extends StatefulWidget {
   final int duration;
 
   const AllExam({
-    super.key,
+    Key? key,
     required this.examId,
     required this.Sid,
     required this.Semail,
     required this.Sname,
     required this.duration,
-  });
+  }) : super(key: key);
 
   @override
   State<AllExam> createState() => _AllExamState();
@@ -48,7 +49,6 @@ class _AllExamState extends State<AllExam> {
       ));
     }
 
-    // Recalculate total grade for MCQ and True/False questions
     totalGrade = studentAnswers
         .where((answer) => answer.grade != -1)
         .fold(0, (sum, answer) => sum + answer.grade);
@@ -56,7 +56,6 @@ class _AllExamState extends State<AllExam> {
 
   void _submitExam() async {
     try {
-      // Get all question IDs from the exam
       final examSnapshot = await FirebaseFirestore.instance
           .collection('exams')
           .doc(widget.examId)
@@ -76,16 +75,10 @@ class _AllExamState extends State<AllExam> {
         }),
       );
 
-      // Shuffle the questions to randomize the order each time
-      questions.shuffle();
-
-      // Create a map of all question IDs
       final allQuestionIds =
           questions.map((q) => q['questionId'] as String).toSet();
 
-      // Populate unanswered questions with default values
       for (var qid in allQuestionIds) {
-        // Check if this question is already in studentAnswers
         if (!studentAnswers.any((answer) => answer.Qid == qid)) {
           studentAnswers.add(StudentQuestionsAnswers(
             Qid: qid,
@@ -95,7 +88,6 @@ class _AllExamState extends State<AllExam> {
         }
       }
 
-      // Prepare the answers list
       List<Map<String, dynamic>> answersList = studentAnswers.map((answer) {
         return {
           'Qid': answer.Qid,
@@ -104,32 +96,27 @@ class _AllExamState extends State<AllExam> {
         };
       }).toList();
 
-      // Reference to the student submission document in exam collection
       final examSubmissionRef = FirebaseFirestore.instance
           .collection('exams')
           .doc(widget.examId)
           .collection('studentsSubmissions')
           .doc(widget.Sid);
 
-      // Reference to the student submission document in user collection
       final userSubmissionRef = FirebaseFirestore.instance
           .collection('users')
           .doc(widget.Sid)
           .collection('studentanswer')
           .doc(widget.examId);
 
-      // Run transaction to handle submission
       await FirebaseFirestore.instance.runTransaction((transaction) async {
         final examSubmissionSnapshot = await transaction.get(examSubmissionRef);
 
         int currentAttempts = 0;
 
         if (examSubmissionSnapshot.exists) {
-          // If the document exists, get the current attempts count
           currentAttempts = examSubmissionSnapshot.data()?['attempts'] ?? 0;
         }
 
-        // Prepare the submission data
         Map<String, dynamic> studentExamAnswer = {
           'Sname': widget.Sname,
           'Sid': widget.Sid,
@@ -143,10 +130,7 @@ class _AllExamState extends State<AllExam> {
           'examName': examData['examName'] ?? 'Unnamed Exam',
         };
 
-        // Update or create the submission document in exam collection
         transaction.set(examSubmissionRef, studentExamAnswer);
-
-        // Update or create the submission document in user collection
         transaction.set(userSubmissionRef, studentExamAnswer);
       });
 
@@ -186,6 +170,7 @@ class _AllExamState extends State<AllExam> {
         }
 
         final examData = snapshot.data!.data() as Map<String, dynamic>?;
+
         if (examData == null) {
           return const Center(child: Text("Invalid exam data."));
         }
@@ -199,7 +184,6 @@ class _AllExamState extends State<AllExam> {
           }),
         );
 
-        // Shuffle the questions to randomize the order each time
         questions.shuffle();
 
         return SingleChildScrollView(
@@ -210,107 +194,122 @@ class _AllExamState extends State<AllExam> {
                 duration: widget.duration * 60,
                 onComplete: _submitExam,
               ),
-              ...questions
-                  .asMap()
-                  .map((index, question) {
-                    final type = question['type'] as String? ?? '';
-                    final grade = question['Questiongrade'] as int? ?? 0;
-                    final questionText = question['question'] as String? ?? '';
-                    final imageUrl = question['imageUrl'] as String?;
-                    final questionId = question['questionId'] as String? ?? '';
-                    final correctAnswer =
-                        question['correctAnswer'] as String? ?? '';
+              ...questions.asMap().entries.map((entry) {
+                final index = entry.key + 1;
+                final question = entry.value;
+                final type = question['type'] as String? ?? '';
+                final grade = question['Questiongrade'] as int? ?? 0;
+                final questionText = question['question'] as String? ?? '';
+                final imageUrl = question['imageUrl'] as String?;
+                final questionId = question['questionId'] as String? ?? '';
+                final correctAnswer =
+                    question['correctAnswer'] as String? ?? '';
 
-                    Widget questionWidget;
-                    switch (type) {
-                      case "Multiple Choice":
-                        final options = List<String>.from(
-                            (question['options'] as List<dynamic>? ?? [])
-                                .map((e) => e?.toString() ?? ''));
-                        questionWidget = MCQQuestion(
-                          Qid: questionId,
-                          grade: grade,
-                          questionTxt: questionText,
-                          imgURL: imageUrl,
-                          Sid: widget.Sid,
-                          Semail: widget.Semail,
-                          Sname: widget.Sname,
-                          option1: options.isNotEmpty ? options[0] : '',
-                          option2: options.length > 1 ? options[1] : '',
-                          option3: options.length > 2 ? options[2] : '',
-                          option4: options.length > 3 ? options[3] : '',
-                          correctAnswer: correctAnswer,
-                          onAnswerChanged: (answer, correctAnswer) {
-                            int calculatedGrade =
-                                (answer == correctAnswer) ? grade : 0;
-                            _updateAnswer(questionId, answer, calculatedGrade);
-                          },
-                        );
-                        break;
+                Widget questionWidget;
 
-                      case "True/False":
-                        questionWidget = TFQuestion(
-                          Qid: questionId,
-                          grade: grade,
-                          questionTxt: questionText,
-                          imgURL: imageUrl,
-                          Sid: widget.Sid,
-                          Semail: widget.Semail,
-                          Sname: widget.Sname,
-                          correctAnswer: correctAnswer,
-                          onAnswerChanged: (answer, grade) {
-                            _updateAnswer(questionId, answer, grade);
-                          },
-                        );
-                        break;
+                switch (type) {
+                  case "Multiple Choice":
+                    final options = List<String>.from(
+                        (question['options'] as List<dynamic>? ?? []));
+                    questionWidget = MCQQuestion(
+                      Qid: questionId,
+                      grade: grade,
+                      questionTxt: questionText,
+                      imgURL: imageUrl,
+                      Sid: widget.Sid,
+                      Semail: widget.Semail,
+                      Sname: widget.Sname,
+                      option1: options.isNotEmpty ? options[0] : '',
+                      option2: options.length > 1 ? options[1] : '',
+                      option3: options.length > 2 ? options[2] : '',
+                      option4: options.length > 3 ? options[3] : '',
+                      correctAnswer: correctAnswer,
+                      onAnswerChanged: (answer, correctAnswer) {
+                        int calculatedGrade =
+                            (answer == correctAnswer) ? grade : 0;
+                        _updateAnswer(questionId, answer, calculatedGrade);
+                      },
+                    );
+                    break;
+                  case "True/False":
+                    questionWidget = TFQuestion(
+                      Qid: questionId,
+                      grade: grade,
+                      questionTxt: questionText,
+                      imgURL: imageUrl,
+                      Sid: widget.Sid,
+                      Semail: widget.Semail,
+                      Sname: widget.Sname,
+                      correctAnswer: correctAnswer,
+                      onAnswerChanged: (answer, grade) {
+                        _updateAnswer(questionId, answer, grade);
+                      },
+                    );
+                    break;
+                  case "Essay":
+                    questionWidget = EssayQuestion(
+                      Qid: questionId,
+                      grade: grade,
+                      questionTxt: questionText,
+                      imgURL: imageUrl,
+                      Sid: widget.Sid,
+                      Semail: widget.Semail,
+                      Sname: widget.Sname,
+                      onAnswerChanged: (answer) {
+                        _updateAnswer(questionId, answer, -1);
+                      },
+                    );
+                    break;
+                  case "Short Answer":
+                    questionWidget = ShortAnswerQuestion(
+                      Qid: questionId,
+                      grade: grade,
+                      questionTxt: questionText,
+                      imgURL: imageUrl,
+                      Sid: widget.Sid,
+                      Semail: widget.Semail,
+                      Sname: widget.Sname,
+                      onAnswerChanged: (answer) {
+                        _updateAnswer(questionId, answer, -1);
+                      },
+                    );
+                    break;
+                  default:
+                    questionWidget = const SizedBox();
+                }
 
-                      case "Essay":
-                        questionWidget = EssayQuestion(
-                          Qid: questionId,
-                          grade: grade,
-                          questionTxt: questionText,
-                          imgURL: imageUrl,
-                          Sid: widget.Sid,
-                          Semail: widget.Semail,
-                          Sname: widget.Sname,
-                          onAnswerChanged: (answer) {
-                            _updateAnswer(questionId, answer, -1);
-                          },
-                        );
-                        break;
-
-                      case "Short Answer":
-                        questionWidget = ShortAnswerQuestion(
-                          Qid: questionId,
-                          grade: grade,
-                          questionTxt: questionText,
-                          imgURL: imageUrl,
-                          Sid: widget.Sid,
-                          Semail: widget.Semail,
-                          Sname: widget.Sname,
-                          onAnswerChanged: (answer) {
-                            _updateAnswer(questionId, answer, -1);
-                          },
-                        );
-                        break;
-
-                      default:
-                        questionWidget = const SizedBox();
-                    }
-                    return MapEntry(index, questionWidget);
-                  })
-                  .values
-                  .toList(),
-              // Display total grade (for testing purposes)
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (index > 1) Divider(color: Colors.grey, thickness: 1),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        'Q$index:',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    questionWidget,
+                  ],
+                );
+              }).toList(),
+              const Divider(color: Colors.grey, thickness: 1),
               Padding(
                 padding: const EdgeInsets.all(16.0),
-                child: Text('Total Grade: $totalGrade'),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: ElevatedButton(
-                  onPressed: _submitExam,
-                  child: const Text("Submit Exam"),
+                child: Center(
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.buttonColor,
+                    ),
+                    onPressed: _submitExam,
+                    child: const Text(
+                      "Submit Exam",
+                      style: TextStyle(color: AppColors.pageColor),
+                    ),
+                  ),
                 ),
               ),
             ],
