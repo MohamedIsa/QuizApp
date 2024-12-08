@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:project_444/pages/adminhome/widgets/addQuestion.dart';
 import '../../models/questions.dart';
+import 'EditQuestion.dart';
 
 class AddQuestionExam extends StatefulWidget {
   final String examId;
@@ -55,22 +56,52 @@ class _AddQuestionExamState extends State<AddQuestionExam> {
     );
   }
 
+// In AddQuestionExam.dart, modify _editQuestionDialog:
+
   void _editQuestionDialog(int index) {
+    Map<String, dynamic> existingQuestion = _questions[index];
+    final currentImageUrl = existingQuestion['imageUrl'] as String?;
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AddQuestion(
-          onAddQuestion: (Question question) {
-            setState(() {
-              _questions[index] = {
-                'type': question.questionType,
-                'question': question.questionText,
-                'options': question.questionType,
-                'correctAnswer': question.correctAnswer,
-                'Questiongrade': question.grade,
-                'imageUrl': question.imageUrl,
-              };
-            });
+        return EditQuestion(
+          initialType: existingQuestion['type'],
+          initialQuestion: existingQuestion['question'],
+          initialOptions: List<String>.from(existingQuestion['options'] ?? []),
+          initialCorrectAnswer: existingQuestion['correctAnswer'],
+          initialGrade: existingQuestion['Questiongrade'].toString(),
+          imageUrl: currentImageUrl,
+          onEditQuestion: (String type, String question, List<String> options,
+              String? correctAnswer, String grade, String? newImageUrl) async {
+            try {
+              // Delete old image if it's being replaced or removed
+              if (currentImageUrl != null && currentImageUrl != newImageUrl) {
+                try {
+                  await FirebaseStorage.instance
+                      .refFromURL(currentImageUrl)
+                      .delete();
+                } catch (e) {
+                  print('Error deleting old image: $e');
+                }
+              }
+
+              setState(() {
+                _questions[index] = {
+                  'type': type,
+                  'question': question,
+                  'options': options,
+                  'correctAnswer': correctAnswer,
+                  'Questiongrade': int.parse(grade),
+                  'imageUrl': newImageUrl, // Use new image URL
+                  'questionId': existingQuestion['questionId'],
+                };
+              });
+            } catch (e) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Error updating question: $e')),
+              );
+            }
           },
         );
       },

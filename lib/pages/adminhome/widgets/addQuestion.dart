@@ -8,24 +8,52 @@ import '../../models/questions.dart';
 
 class AddQuestion extends StatefulWidget {
   final Function(Question) onAddQuestion;
+  final Question? initialQuestion;
 
-  const AddQuestion({super.key, required this.onAddQuestion});
+  const AddQuestion(
+      {super.key, required this.onAddQuestion, this.initialQuestion});
 
   @override
-  AddQuestionState createState() => AddQuestionState();
+  @override
+  AddQuestionState createState() {
+    print("Initial Question: ${initialQuestion.toString()}"); // Debugging print
+    return AddQuestionState();
+  }
 }
 
 class AddQuestionState extends State<AddQuestion> {
   final _formKey = GlobalKey<FormState>();
   String _questionType = '';
   String _questionText = '';
-  int _questionGrade = 0; // Ensure this is an int
+  int _questionGrade = 0;
   List<String> _options = ['', '', '', ''];
   String? _correctAnswer;
   File? _imageFile;
   String? _imageUrl;
 
   final ImagePicker _picker = ImagePicker();
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (widget.initialQuestion != null) {
+      _questionType = widget.initialQuestion!.questionType;
+      _questionText = widget.initialQuestion!.questionText;
+      _questionGrade = widget.initialQuestion!.grade;
+      _options = List<String>.from(widget.initialQuestion!.options ?? []);
+      _correctAnswer = widget.initialQuestion!.correctAnswer;
+      _imageUrl = widget.initialQuestion!.imageUrl;
+
+      print("Initialized Fields:");
+      print("Type: $_questionType");
+      print("Text: $_questionText");
+      print("Grade: $_questionGrade");
+      print("Options: $_options");
+      print("Correct Answer: $_correctAnswer");
+      print("Image URL: $_imageUrl");
+    }
+  }
 
   Future<void> _pickImage() async {
     try {
