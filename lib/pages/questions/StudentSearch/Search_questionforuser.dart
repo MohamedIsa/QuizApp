@@ -45,11 +45,7 @@ class _SearchQuestionForUserState extends State<SearchQuestionForUser> {
             child: StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
                   .collection('exams')
-                  .where('endDate',
-                      isGreaterThan: DateTime.now()
-                          .toIso8601String()) // show only results that isn't finished
-                  // (enDdate is > greater than now)
-                  // to make sure that user can't submit again..
+                  .where('startDate')
                   .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -166,13 +162,12 @@ class _SearchQuestionForUserState extends State<SearchQuestionForUser> {
   }
 
   void _handleQuestionTap(String examId, BuildContext context) async {
-    // Navigate to the exam session based on the examId
-    // When user click on question
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => StudentExamSession(examId: examId),
-      ),
-    );
+    // For future use,, now it's comment , to prevent user to open the exam multiple times
+    // Navigator.push(
+    //   context,
+    //   MaterialPageRoute(
+    //     builder: (context) => StudentExamSession(examId: examId),
+    //   ),
+    // );
   }
 }
