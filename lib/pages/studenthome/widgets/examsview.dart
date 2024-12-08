@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:project_444/constant.dart';
 import 'package:project_444/pages/studenthome/widgets/StudentExamWidget.dart';
 import 'package:project_444/pages/studenthome/widgets/studentexamsession.dart';
 
@@ -201,11 +202,17 @@ class _StudentExamState extends State<StudentExam> {
               ),
               const SizedBox(height: 20),
               ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.buttonColor, // Background color
+                ),
                 onPressed: () {
                   Navigator.of(context).pop();
                   _showConfirmationDialog(context, examId);
                 },
-                child: const Text('Start Exam'),
+                child: const Text(
+                  'Start Exam',
+                  style: TextStyle(color: AppColors.pageColor),
+                ),
               ),
             ],
           ),
@@ -226,9 +233,15 @@ class _StudentExamState extends State<StudentExam> {
               children: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Cancel'),
+                  child: const Text(
+                    'Cancel',
+                    style: TextStyle(color: AppColors.textBlack),
+                  ),
                 ),
                 ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.buttonColor, // Background color
+                  ),
                   onPressed: () {
                     Navigator.of(context).pop();
                     Navigator.push(
@@ -239,7 +252,10 @@ class _StudentExamState extends State<StudentExam> {
                       ),
                     );
                   },
-                  child: const Text('Start Exam'),
+                  child: const Text(
+                    'Start Exam',
+                    style: TextStyle(color: AppColors.pageColor),
+                  ),
                 ),
               ],
             )
