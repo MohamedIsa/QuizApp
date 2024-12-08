@@ -37,7 +37,7 @@ class GradeView extends StatelessWidget {
                 builder: (context, submissionSnapshot) {
                   if (submissionSnapshot.connectionState ==
                       ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
+                    return Center(child: Container());
                   }
                   if (!submissionSnapshot.hasData ||
                       !submissionSnapshot.data!.exists) {
