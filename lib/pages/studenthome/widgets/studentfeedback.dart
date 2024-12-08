@@ -73,9 +73,8 @@ class StudentFeedbackPage extends StatelessWidget {
                 displayFeedback(context, studentSnapshot);
               } catch (e) {
                 // Handle any potential errors
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Error fetching feedback: $e')),
-                );
+                SnackbarUtils.showErrorSnackbar(
+                    context, 'Error fetching feedback: $e');
               }
             },
           ),

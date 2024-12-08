@@ -33,8 +33,13 @@ class _SearchQuestionForUserState extends State<SearchQuestionForUser> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Search Questions..."),
-        backgroundColor: AppColors.buttonColor,
+        iconTheme: IconThemeData(color: AppColors.buttonTextColor),
+        title: const Text(
+          "Search Questions...",
+          style: TextStyle(color: AppColors.buttonTextColor),
+        ),
+        centerTitle: true,
+        backgroundColor: AppColors.appBarColor,
       ),
       body: Column(
         children: [

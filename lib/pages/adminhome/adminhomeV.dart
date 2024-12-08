@@ -179,9 +179,10 @@ class Adminhome extends StatelessWidget {
             indicatorColor: AppColors.buttonTextColor,
             tabs: [
               Tab(
+                icon: Icon(Icons.check_rounded),
                 text: "Complete Exam",
               ),
-              Tab(text: "Upcoming Exam"),
+              Tab(icon: Icon(Icons.book), text: "Upcoming Exam"),
             ],
           ),
         ),
