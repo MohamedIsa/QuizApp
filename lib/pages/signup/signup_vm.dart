@@ -4,6 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../utils/popup.dart';
 import 'package:project_444/pages/models/user.dart';
 
+import '../login/user_data.dart';
+
 Future<void> registerUser(
     BuildContext context,
     TextEditingController nameController,
@@ -51,7 +53,7 @@ Future<void> registerUser(
       'email': user.email,
       'role': user.role,
     });
-
+    UserData.setUserData(user.email, user.name, user.role);
     Navigator.pushReplacementNamed(context, '/dashboard');
   } catch (e) {
     print('Error registering user: $e');

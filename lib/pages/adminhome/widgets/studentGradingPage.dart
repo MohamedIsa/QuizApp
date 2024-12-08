@@ -272,6 +272,7 @@ class _StudentGradingPageState extends State<StudentGradingPage> {
                   answer?['AnswerValue'] ?? 'No answer provided';
               final currentGrade = answer?['grade'] ?? -1;
               final imageUrl = question['imageUrl'];
+              print('Answer Value: $answerValue\n');
 
               Widget gradeWidget;
 
@@ -338,25 +339,26 @@ class _StudentGradingPageState extends State<StudentGradingPage> {
                         ),
                       ),
                       const SizedBox(height: 8.0),
-                      if (imageUrl != null && imageUrl.isNotEmpty)
-                        Column(
-                          children: [
-                            Image.network(imageUrl),
-                            const SizedBox(height: 8.0),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "Answer: $answerValue",
-                                  style: const TextStyle(
-                                      fontSize: 14.0,
-                                      color: AppColors
-                                          .textBlack), // Answer text color
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
+                      Column(
+                        children: [
+                          imageUrl != null
+                              ? Image.network(imageUrl)
+                              : SizedBox.shrink(),
+                          const SizedBox(height: 8.0),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Answer: $answerValue",
+                                style: const TextStyle(
+                                    fontSize: 14.0,
+                                    color: AppColors
+                                        .textBlack), // Answer text color
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                       const SizedBox(height: 16.0),
                       gradeWidget,
                     ],

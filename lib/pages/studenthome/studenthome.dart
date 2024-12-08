@@ -147,12 +147,6 @@ class _StudenthomeState extends State<Studenthome>
         ),
         iconTheme: const IconThemeData(color: AppColors.buttonTextColor),
         backgroundColor: AppColors.appBarColor,
-        actions: [
-          IconButton(
-            icon: Badge.count(child: Icon(Icons.notifications), count: 99),
-            onPressed: () {},
-          ),
-        ],
         bottom: TabBar(
           controller: _tabController,
           indicatorColor: AppColors.buttonTextColor,
