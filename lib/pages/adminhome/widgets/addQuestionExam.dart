@@ -137,6 +137,13 @@ class _AddQuestionExamState extends State<AddQuestionExam> {
         'questions': FieldValue.arrayUnion(questionsToSave),
       });
 
+      await FirebaseFirestore.instance
+          .collection('exams')
+          .doc(widget.examId)
+          .update({
+        'totalGrade': _calculateTotalGrade(),
+      });
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Exam created successfully!")),
       );
@@ -148,6 +155,11 @@ class _AddQuestionExamState extends State<AddQuestionExam> {
       );
       print("Error saving exam: $error");
     }
+  }
+
+  int _calculateTotalGrade() {
+    return _questions.fold(
+        0, (sum, question) => sum + (question['Questiongrade'] as int));
   }
 
   @override
@@ -232,6 +244,11 @@ class _AddQuestionExamState extends State<AddQuestionExam> {
                   );
                 },
               ),
+            ),
+            SizedBox(height: 20),
+            Text(
+              'Total Grade: ${_calculateTotalGrade()}',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 20),
             ElevatedButton.icon(

@@ -92,6 +92,14 @@ class _AllExamState extends State<AllExam> {
         }
       }
 
+      // Check if all answers have 'none' value and set totalGrade to 0
+      if (studentAnswers.every((answer) => answer.AnswerValue == 'none')) {
+        totalGrade = 0;
+      } else if (questions
+          .any((q) => q['type'] == "Short Answer" || q['type'] == "Essay")) {
+        totalGrade = -1;
+      }
+
       // Prepare the answers list
       List<Map<String, dynamic>> answersList = studentAnswers.map((answer) {
         return {
