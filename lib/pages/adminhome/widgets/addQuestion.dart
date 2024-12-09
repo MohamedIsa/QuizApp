@@ -278,7 +278,10 @@ class AddQuestionState extends State<AddQuestion> {
                   ),
                 ),
                 keyboardType: TextInputType.number,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  FilteringTextInputFormatter.allow(RegExp(r'[1-9][0-9]*')),
+                ],
                 validator: (value) => value == null || value.isEmpty
                     ? 'Grade cannot be empty'
                     : null,

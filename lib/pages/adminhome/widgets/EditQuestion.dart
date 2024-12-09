@@ -202,7 +202,10 @@ class _EditQuestionState extends State<EditQuestion> {
               initialValue: questionGrade,
               decoration: InputDecoration(labelText: 'Grade'),
               keyboardType: TextInputType.number,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly,
+                FilteringTextInputFormatter.allow(RegExp(r'[1-9][0-9]*')),
+              ],
               onChanged: (value) => setState(() => questionGrade = value),
             ),
 
@@ -210,30 +213,35 @@ class _EditQuestionState extends State<EditQuestion> {
               SizedBox(height: 16),
               ...List.generate(
                 4,
-                (index) => Row(
-                  children: [
-                    Radio<String>(
-                      value: options[index],
-                      groupValue: correctAnswer,
-                      onChanged: options[index].isNotEmpty
-                          ? (value) => setState(() => correctAnswer = value)
-                          : null,
-                    ),
-                    Expanded(
-                      child: TextFormField(
-                        initialValue: options[index],
-                        decoration: InputDecoration(
-                          labelText: 'Option ${index + 1}',
-                          errorText: _isDuplicateOption(options[index], index)
-                              ? 'Duplicate option'
-                              : null,
-                        ),
-                        onChanged: (value) =>
-                            setState(() => options[index] = value),
+                (index) {
+                  if (options.length <= index) {
+                    options.add('');
+                  }
+                  return Row(
+                    children: [
+                      Radio<String>(
+                        value: options[index],
+                        groupValue: correctAnswer,
+                        onChanged: options[index].isNotEmpty
+                            ? (value) => setState(() => correctAnswer = value)
+                            : null,
                       ),
-                    ),
-                  ],
-                ),
+                      Expanded(
+                        child: TextFormField(
+                          initialValue: options[index],
+                          decoration: InputDecoration(
+                            labelText: 'Option ${index + 1}',
+                            errorText: _isDuplicateOption(options[index], index)
+                                ? 'Duplicate option'
+                                : null,
+                          ),
+                          onChanged: (value) =>
+                              setState(() => options[index] = value),
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
             ],
 
