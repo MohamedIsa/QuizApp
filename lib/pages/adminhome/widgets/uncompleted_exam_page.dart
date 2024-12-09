@@ -89,7 +89,7 @@ class _UncompletedExamPageState extends State<UncompletedExamPage> {
 
               if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                 return const Center(
-                    child: Text('No uncompleted exams found.',
+                    child: Text('No Upcoming exams found.',
                         style: TextStyle(fontSize: 16)));
               }
 
@@ -106,7 +106,7 @@ class _UncompletedExamPageState extends State<UncompletedExamPage> {
 
               if (exams.isEmpty) {
                 return const Center(
-                    child: Text('No matching exams found.',
+                    child: Text('No Upcoming exams found.',
                         style: TextStyle(fontSize: 16)));
               }
 

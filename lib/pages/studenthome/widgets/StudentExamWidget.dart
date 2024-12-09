@@ -61,7 +61,7 @@ class StudentExamWidget extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Duration: $duration',
+              'Duration: $duration minutes',
               style: TextStyle(color: Colors.grey[700]),
             ),
             const SizedBox(height: 8),

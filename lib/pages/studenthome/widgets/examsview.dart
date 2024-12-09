@@ -46,7 +46,7 @@ class _StudentExamState extends State<StudentExam> {
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
           return const Center(
             child: Text(
-              'No uncompleted exams found.',
+              'No Exam is Available',
               style: TextStyle(fontSize: 16),
             ),
           );
@@ -63,7 +63,7 @@ class _StudentExamState extends State<StudentExam> {
         if (exams.isEmpty) {
           return const Center(
             child: Text(
-              'There are no upcoming exams.',
+              'No Exam is Available.',
               style: TextStyle(fontSize: 16),
             ),
           );
