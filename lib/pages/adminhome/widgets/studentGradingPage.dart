@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
-import 'package:project_444/constant.dart';
+import 'package:quizapp/constant.dart';
 
 class StudentGradingPage extends StatefulWidget {
   final String Sid;

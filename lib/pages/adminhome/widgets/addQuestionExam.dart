@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:project_444/constant.dart';
-import 'package:project_444/pages/adminhome/widgets/addQuestion.dart';
+import 'package:quizapp/constant.dart';
+import 'package:quizapp/pages/adminhome/widgets/addQuestion.dart';
 import '../../models/questions.dart';
 import 'EditQuestion.dart';
 

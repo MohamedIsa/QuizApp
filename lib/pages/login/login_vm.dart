@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../utils/popup.dart';
 import '../../pages/models/user.dart';
-import 'package:project_444/pages/login/user_data.dart'; // Import the UserData class
+import 'package:quizapp/pages/login/user_data.dart'; // Import the UserData class
 
 //===================================================================
 // SignIn function

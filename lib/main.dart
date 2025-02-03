@@ -1,10 +1,10 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:project_444/pages/adminhome/widgets/addExam.dart';
-import 'package:project_444/pages/adminhome/widgets/addQuestionExam.dart';
-import 'package:project_444/pages/forgotpassword/forgot_v.dart';
-import 'package:project_444/pages/studenthome/studenthome.dart';
-import 'package:project_444/utils/loading.dart';
+import 'package:quizapp/pages/adminhome/widgets/addExam.dart';
+import 'package:quizapp/pages/adminhome/widgets/addQuestionExam.dart';
+import 'package:quizapp/pages/forgotpassword/forgot_v.dart';
+import 'package:quizapp/pages/studenthome/studenthome.dart';
+import 'package:quizapp/utils/loading.dart';
 import 'pages/adminhome/adminhomeV.dart';
 import 'firebase_options.dart';
 import 'pages/complete/complete_v.dart';

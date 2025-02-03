@@ -1,7 +1,7 @@
 // countdown_timer.dart
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:project_444/constant.dart';
+import 'package:quizapp/constant.dart';
 
 class CountdownTimer extends StatefulWidget {
   final int duration; // Duration in seconds

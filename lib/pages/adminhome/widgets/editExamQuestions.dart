@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
-import 'package:project_444/constant.dart';
+import 'package:quizapp/constant.dart';
 import 'question_edit_dialog.dart';
 
 class EditExamQuestions extends StatefulWidget {

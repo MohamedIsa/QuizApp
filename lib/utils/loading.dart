@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:project_444/constant.dart';
+import 'package:quizapp/constant.dart';
 
 class Loading extends StatefulWidget {
   const Loading({super.key});

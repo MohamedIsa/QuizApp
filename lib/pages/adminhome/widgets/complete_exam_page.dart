@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:project_444/pages/adminhome/widgets/ExamAnswers.dart';
-import 'package:project_444/pages/adminhome/widgets/ExamWidget.dart';
+import 'package:quizapp/pages/adminhome/widgets/ExamAnswers.dart';
+import 'package:quizapp/pages/adminhome/widgets/ExamWidget.dart';
 
 class CompleteExamPage extends StatefulWidget {
   const CompleteExamPage({Key? key}) : super(key: key);

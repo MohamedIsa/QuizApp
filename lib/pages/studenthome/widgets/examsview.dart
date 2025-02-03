@@ -2,9 +2,9 @@ import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:project_444/constant.dart';
-import 'package:project_444/pages/studenthome/widgets/StudentExamWidget.dart';
-import 'package:project_444/pages/studenthome/widgets/studentexamsession.dart';
+import 'package:quizapp/constant.dart';
+import 'package:quizapp/pages/studenthome/widgets/StudentExamWidget.dart';
+import 'package:quizapp/pages/studenthome/widgets/studentexamsession.dart';
 
 class StudentExam extends StatefulWidget {
   const StudentExam({Key? key}) : super(key: key);

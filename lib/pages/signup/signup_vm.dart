@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../utils/popup.dart';
-import 'package:project_444/pages/models/user.dart';
+import 'package:quizapp/pages/models/user.dart';
 
 import '../login/user_data.dart';
 

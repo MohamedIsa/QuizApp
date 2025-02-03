@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:project_444/constant.dart';
-import 'package:project_444/pages/adminhome/widgets/editExamQuestions.dart';
+import 'package:quizapp/constant.dart';
+import 'package:quizapp/pages/adminhome/widgets/editExamQuestions.dart';
 
 class EditExamPage extends StatefulWidget {
   final String Eid; // The exam ID passed to this page

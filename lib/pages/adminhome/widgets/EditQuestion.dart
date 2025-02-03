@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:project_444/constant.dart';
-import 'package:project_444/firebase_options.dart';
+import 'package:quizapp/constant.dart';
+import 'package:quizapp/firebase_options.dart';
 
 class EditQuestion extends StatefulWidget {
   final String initialType;

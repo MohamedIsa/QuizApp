@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:project_444/pages/adminhome/widgets/ExamWidget.dart';
-import 'package:project_444/pages/adminhome/widgets/editExamPage.dart';
+import 'package:quizapp/pages/adminhome/widgets/ExamWidget.dart';
+import 'package:quizapp/pages/adminhome/widgets/editExamPage.dart';
 
 class UncompletedExamPage extends StatefulWidget {
   const UncompletedExamPage({Key? key}) : super(key: key);

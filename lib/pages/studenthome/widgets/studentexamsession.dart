@@ -2,8 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart'; // For Firebase Authentication
-import 'package:project_444/constant.dart';
-import 'package:project_444/pages/questions/Allexam.dart';
+import 'package:quizapp/constant.dart';
+import 'package:quizapp/pages/questions/Allexam.dart';
 
 class Exam {
   final String examName;

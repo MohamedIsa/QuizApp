@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:project_444/constant.dart';
-import 'package:project_444/pages/adminhome/widgets/studentGradingPage.dart';
+import 'package:quizapp/constant.dart';
+import 'package:quizapp/pages/adminhome/widgets/studentGradingPage.dart';
 
 class ExamAnswers extends StatefulWidget {
   final String ExamName;

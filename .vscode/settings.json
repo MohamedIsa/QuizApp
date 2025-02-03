@@ -3,6 +3,6 @@
     "editor.formatOnSave": true
   },
   "java.configuration.updateBuildConfiguration": "interactive",
-  "cmake.sourceDirectory": "/home/mohamed/Desktop/project_444/linux",
+  "cmake.sourceDirectory": "/home/mohamed/Desktop/quizapp/linux",
   "java.compile.nullAnalysis.mode": "automatic"
 }

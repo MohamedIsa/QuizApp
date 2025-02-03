@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:project_444/utils/popup.dart';
+import 'package:quizapp/utils/popup.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 Future<void> forgetpassword(

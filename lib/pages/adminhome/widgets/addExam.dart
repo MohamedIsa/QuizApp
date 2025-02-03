@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:project_444/constant.dart';
-import 'package:project_444/pages/adminhome/widgets/addQuestionExam.dart';
+import 'package:quizapp/constant.dart';
+import 'package:quizapp/pages/adminhome/widgets/addQuestionExam.dart';
 
 class AddExamWidget extends StatefulWidget {
   const AddExamWidget({super.key});

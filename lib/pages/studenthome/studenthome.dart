@@ -1,11 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:project_444/constant.dart';
+import 'package:quizapp/constant.dart';
 import 'package:flutter/material.dart';
-import 'package:project_444/pages/login/login_v.dart';
-import 'package:project_444/pages/login/user_data.dart';
+import 'package:quizapp/pages/login/login_v.dart';
+import 'package:quizapp/pages/login/user_data.dart';
 import 'widgets/examsview.dart';
 import 'widgets/gradeview.dart';
-import 'package:project_444/pages/questions/StudentSearch/Search_questionforuser.dart';
+import 'package:quizapp/pages/questions/StudentSearch/Search_questionforuser.dart';
 
 class Studenthome extends StatefulWidget {
   final String name;

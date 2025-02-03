@@ -1,6 +1,6 @@
 {
-    "name": "project_444",
-    "short_name": "project_444",
+    "name": "quizapp",
+    "short_name": "quizapp",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

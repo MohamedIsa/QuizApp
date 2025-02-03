@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:project_444/constant.dart';
+import 'package:quizapp/constant.dart';
 import '../../utils/texfield.dart';
 import '../../utils/withgoogle.dart';
-import 'package:project_444/pages/signup/signup_vm.dart';
+import 'package:quizapp/pages/signup/signup_vm.dart';
 
 class SignUp extends StatelessWidget {
   final TextEditingController name = TextEditingController();

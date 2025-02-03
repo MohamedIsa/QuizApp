@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:project_444/constant.dart';
-import 'package:project_444/pages/adminhome/widgets/complete_exam_page.dart';
-import 'package:project_444/pages/adminhome/widgets/uncompleted_exam_page.dart';
-import 'package:project_444/pages/login/login_v.dart';
+import 'package:quizapp/constant.dart';
+import 'package:quizapp/pages/adminhome/widgets/complete_exam_page.dart';
+import 'package:quizapp/pages/adminhome/widgets/uncompleted_exam_page.dart';
+import 'package:quizapp/pages/login/login_v.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:project_444/pages/login/user_data.dart';
+import 'package:quizapp/pages/login/user_data.dart';
 
 class Adminhome extends StatelessWidget {
   const Adminhome({super.key});
