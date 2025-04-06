@@ -7,10 +7,7 @@
    - [Dart](https://marketplace.visualstudio.com/items?itemName=ms-vscode.vscode-dart)
    - [Flutter](https://marketplace.visualstudio.com/items?itemName=ms-vscode.vscode-flutter)
 
-1. Download and install:
-
-   - [Dart-SDK](https://dart.dev/get-dart)
-   - [Flutter-SDK](https://flutter.dev/docs/get-started/install).
+1. Download and install: [Flutter-SDK](https://flutter.dev/docs/get-started/install), no need to install Dart-SDK since flutter sdk include dart sdk
 
 1. Create a folder named **flutter** at `C:\` to install the Flutter SDK.
    After that add the following path to **PATH** in the desktop environment `C:\flutter\bin`
