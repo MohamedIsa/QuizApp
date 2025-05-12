@@ -34,3 +34,16 @@ flutter pub get
 - For icons and font styles, check out [Google Fonts](https://fonts.google.com)
 
 ## Project UI
+![alt text](assets/1.jpg)
+![alt text](assets/2.jpg)
+![alt text](assets/3.jpg)
+![alt text](assets/4.jpg)
+![alt text](assets/5.jpg)
+![alt text](assets/6.jpg)
+![alt text](assets/8.jpg)
+![alt text](assets/9.jpg)
+![alt text](assets/10.jpg)
+![alt text](assets/11.jpg)
+![alt text](assets/12.jpg)
+![alt text](assets/13.jpg)
+![alt text](assets/14.jpg)
